@@ -1,4 +1,4 @@
-package com.ryanp102694.pubgtelemetryparser;
+package com.github.ryanp102694.pubgtelemetryparser;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
