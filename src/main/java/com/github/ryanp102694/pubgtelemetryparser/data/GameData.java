@@ -18,8 +18,8 @@ public class GameData {
      * This will hold information about what is on the map. Should know where red/blue, white zone are.
      * Should know where packages are and what time they landed.
      */
-    private List<MapState> mapStates;
-    private Map<String, Set<String>> teamData;
+    private List<GameState> gameStates;
+    private Map<Integer, Set<String>> teamData;
     private Map<String, List<PlayerState>> playerStateMap;
 
 
@@ -31,19 +31,19 @@ public class GameData {
         this.gameId = gameId;
     }
 
-    public List<MapState> getMapStates() {
-        return mapStates;
+    public List<GameState> getGameStates() {
+        return gameStates;
     }
 
-    public void setMapStates(List<MapState> mapStates) {
-        this.mapStates = mapStates;
+    public void setGameStates(List<GameState> gameStates) {
+        this.gameStates = gameStates;
     }
 
-    public Map<String, Set<String>> getTeamData() {
+    public Map<Integer, Set<String>> getTeamData() {
         return teamData;
     }
 
-    public void setTeamData(Map<String, Set<String>> teamData) {
+    public void setTeamData(Map<Integer, Set<String>> teamData) {
         this.teamData = teamData;
     }
 
