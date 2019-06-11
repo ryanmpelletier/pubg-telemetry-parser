@@ -28,7 +28,7 @@ public class PlayerPositionEventHandler implements TelemetryEventHandler {
         playerState.setPlayer(player);
         playerState.setNumAlivePlayers(event.getInt("numAlivePlayers"));
         playerState.setElapsedTime(event.getInt("elapsedTime"));
-        playerState.setIsGame(event.getJSONObject("common").getDouble("isGame"));
+        playerState.setIsGame(String.valueOf(event.getJSONObject("common").getDouble("isGame")));
         playerState.setTime(Instant.parse(event.getString("_D")));
 
 

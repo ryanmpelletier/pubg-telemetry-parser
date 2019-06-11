@@ -1,8 +1,7 @@
 package com.github.ryanp102694.pubgtelemetryparser.data;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.Instant;
+import java.util.*;
 
 /**
  * Will store all game info as game progresses.
@@ -13,6 +12,7 @@ import java.util.Set;
 public class GameData {
 
     private String gameId;
+    private Instant startTime;
 
     /**
      * This will hold information about what is on the map. Should know where red/blue, white zone are.
@@ -29,6 +29,14 @@ public class GameData {
 
     public void setGameId(String gameId) {
         this.gameId = gameId;
+    }
+
+    public Instant getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Instant startTime) {
+        this.startTime = startTime;
     }
 
     public List<GameState> getGameStates() {
@@ -54,4 +62,46 @@ public class GameData {
     public void setPlayerStateMap(Map<String, List<PlayerState>> playerStateMap) {
         this.playerStateMap = playerStateMap;
     }
+
+//    public Map<String, Map<String, String>> getPlayerDataPoints(String isGame){
+//        Map<String, Map<String, String>> returnMap = new HashMap<>();
+//        List<PlayerState> startPhaseStates = getStatesByPhase(isGame);
+//        List<PlayerState> nextPhaseStates = getStatesByPhase(String.valueOf(Double.parseDouble(isGame) + 1.0));
+//
+//        for(PlayerState playerState : startPhaseStates){
+//
+//        }
+//
+//
+//        return returnMap;
+//    }
+
+
+    public List<PlayerState> getStatesByPhase(String isGame){
+        List<PlayerState> playerStates = new ArrayList<>();
+
+        for(String playerName : this.getPlayerStateMap().keySet()){
+            for(PlayerState playerState : this.getPlayerStateMap().get(playerName)){
+                if(playerState.getIsGame().equals(isGame)){
+                    playerStates.add(playerState);
+                    break;
+                }
+            }
+        }
+        return playerStates;
+    }
+
+    public PlayerState getPlayerState(String playerName, Instant time) {
+         List<PlayerState> playerStates = this.getPlayerStateMap().get(playerName);
+
+         //return the player state just before the requested time
+         for(int i = 0; i < playerStates.size(); i++){
+             if(playerStates.get(i).getTime().isAfter(this.startTime)){
+                 return playerStates.get(i);
+             }
+         }
+         //get the last recorded player state if one is not found
+         return playerStates.get(playerStates.size() - 1);
+    }
+
 }

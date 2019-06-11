@@ -14,7 +14,7 @@ import java.time.Instant;
 
 public class Common {
     private Instant time;
-    private double isGame;
+    private String isGame;
 
     public Instant getTime() {
         return time;
@@ -24,11 +24,11 @@ public class Common {
         this.time = time;
     }
 
-    public double getIsGame() {
+    public String getIsGame() {
         return isGame;
     }
 
-    public void setIsGame(double isGame) {
+    public void setIsGame(String isGame) {
         this.isGame = isGame;
     }
 }

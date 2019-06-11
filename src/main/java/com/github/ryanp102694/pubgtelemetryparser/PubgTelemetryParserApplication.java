@@ -2,6 +2,7 @@ package com.github.ryanp102694.pubgtelemetryparser;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
 import com.github.ryanp102694.pubgtelemetryparser.data.GameState;
+import com.github.ryanp102694.pubgtelemetryparser.data.PlayerState;
 import com.github.ryanp102694.pubgtelemetryparser.event.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,6 +12,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.temporal.TemporalAmount;
 import java.util.*;
 
 
@@ -79,7 +82,11 @@ public class PubgTelemetryParserApplication implements CommandLineRunner {
 
 		}
 
-		eventTypes.forEach(System.out::println);
+		Instant gameStart = gameData.getStartTime();
+
+		List<PlayerState> playerStates = gameData.getStatesByPhase("2.0");
+
+		System.out.println(playerStates.size());
 
 	}
 }
