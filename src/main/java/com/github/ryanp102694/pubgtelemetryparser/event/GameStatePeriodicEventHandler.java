@@ -36,7 +36,7 @@ public class GameStatePeriodicEventHandler implements TelemetryEventHandler {
 
         GameState gameState = new GameState();
 
-        gameState.setIsGame(String.valueOf(event.getJSONObject("common").getDouble("isGame")));
+        gameState.setGamePhase(String.valueOf(event.getJSONObject("common").getDouble("isGame")));
         gameState.setTime(Instant.parse(event.getString("_D")));
 
         event = event.getJSONObject("gameState");
