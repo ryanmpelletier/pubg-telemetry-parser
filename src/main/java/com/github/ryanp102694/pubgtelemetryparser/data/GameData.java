@@ -83,12 +83,54 @@ public class GameData {
             statsMap.put("alive", nextPhaseStates.get(playerName) == null ? "0" : "1");
             statsMap.put("numAliveTeamMembers", String.valueOf(calculateAliveTeammates(startPlayerState.getPlayer().getTeamId(), startPlayerState.getPlayer().getName(), gamePhase)));
             statsMap.put("nearestTeamMember", calculateNearestTeamMember(startPlayerState.getPlayer(), gamePhase));
-
+            statsMap.put("distanceToSafeZone", calculateDistanceToSafeZone(startPlayerState.getPlayer(), gamePhase));
+            statsMap.put("safeZoneRadius", calculateSafeZoneRadius(gamePhase));
+            statsMap.put("closestEnemyDistance", calculateClosestEnemyDistance(startPlayerState.getPlayer(), gamePhase));
+            statsMap.put("enemyCountZeroToTwentyFive", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 0.0, 25.0));
+            statsMap.put("enemyCountTwentyFiveToFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 25.0, 50.0));
+            statsMap.put("enemyCountFiftyToOneHundred", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 50.0, 100.0));
             returnMap.put(startPlayerState.getPlayer().getName(), statsMap);
         }
 
-
         return returnMap;
+    }
+
+    private String calculateEnemiesWithinDistance(Player player, String gamePhase, Double minRange, Double maxRange){
+        Map<String, PlayerState> enemyPlayerStates = getEnemyStatesByGamePhase(player, gamePhase);
+
+        Location playerLocation = player.getLocation();
+        //enemies aren't realistically dangerous from 500 meters away
+        Integer numberOfEnemies = 0;
+
+        for(PlayerState enemyPlayerState : enemyPlayerStates.values()){
+            Double distance = playerLocation.distanceBetween(enemyPlayerState.getPlayer().getLocation());
+            if(distance >= minRange && distance < maxRange){
+                numberOfEnemies++;
+            }
+        }
+        return String.valueOf(numberOfEnemies);
+    }
+
+    private String calculateClosestEnemyDistance(Player player, String gamePhase){
+        Map<String, PlayerState> enemyPlayerStates = getEnemyStatesByGamePhase(player, gamePhase);
+
+        Location playerLocation = player.getLocation();
+        //enemies aren't realistically dangerous from 500 meters away
+        Double closestEnemyDistance = 500000.0;
+
+        for(PlayerState enemyPlayerState : enemyPlayerStates.values()){
+            closestEnemyDistance = Math.min(closestEnemyDistance, playerLocation.distanceBetween(enemyPlayerState.getPlayer().getLocation()));
+        }
+        return String.valueOf(closestEnemyDistance);
+    }
+
+    private String calculateSafeZoneRadius(String gamePhase){
+        return String.valueOf(getGameStateByPhase(gamePhase).getSafetyZoneRadius());
+    }
+
+    private String calculateDistanceToSafeZone(Player player, String gamePhase){
+        GameState gameState = getGameStateByPhase(gamePhase);
+        return String.valueOf(gameState.getSafetyZonePosition().distanceBetween(player.getLocation()));
     }
 
     private String calculateNearestTeamMember(Player player, String gamePhase){
@@ -117,6 +159,32 @@ public class GameData {
         return String.valueOf(aliveTeammates);
     }
 
+    private GameState getGameStateByPhase(String gamePhase){
+        for(GameState gameState : this.gameStates){
+            if(gamePhase.equals(gameState.getGamePhase())){
+                return gameState;
+            }
+        }
+        return null;
+    }
+
+    private Map<String, PlayerState> getEnemyStatesByGamePhase(Player player, String gamePhase){
+        Map<String, PlayerState> enemyPlayerStatesMap = new HashMap<>();
+        Set<String> teamMembers = this.teamData.get(player.getTeamId());
+
+        for(String playerName : this.getPlayerStateMap().keySet()){
+            if(!teamMembers.contains(playerName)){
+                for(PlayerState playerState : this.getPlayerStateMap().get(playerName)){
+                    if(playerState.getGamePhase().equals(gamePhase)){
+                        enemyPlayerStatesMap.put(playerName, playerState);
+                        break;
+                    }
+                }
+            }
+        }
+        return enemyPlayerStatesMap;
+    }
+
     private Map<String, PlayerState> getTeamMemberStatesByGamePhase(Player player, String gamePhase){
 
         Map<String, PlayerState> playerStateMap = new HashMap<>();
@@ -124,8 +192,6 @@ public class GameData {
         teamMembers.remove(player.getName());
 
         for(String teamMemberName : teamMembers){
-
-            playerStateMap.put(teamMemberName, null);
 
             List<PlayerState> playerStates = this.playerStateMap.get(teamMemberName);
             for(PlayerState playerState : playerStates){

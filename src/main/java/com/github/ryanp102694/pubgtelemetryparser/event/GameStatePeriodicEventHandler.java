@@ -28,7 +28,6 @@ public class GameStatePeriodicEventHandler implements TelemetryEventHandler {
 
     @Override
     public void handle(JSONObject event, GameData gameData) {
-        System.out.println(event.toString(2));
 
         if(null == gameData.getGameStates()){
             gameData.setGameStates(new ArrayList<>());
