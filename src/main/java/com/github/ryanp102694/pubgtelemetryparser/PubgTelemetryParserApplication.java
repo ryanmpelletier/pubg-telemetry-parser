@@ -84,9 +84,9 @@ public class PubgTelemetryParserApplication implements CommandLineRunner {
 
 		Instant gameStart = gameData.getStartTime();
 
-		List<PlayerState> playerStates = gameData.getStatesByPhase("2.0");
+		Map<String, Map<String, String>> playerDataPoints = gameData.getPlayerDataPoints("1.0");
 
-		System.out.println(playerStates.size());
+		System.out.println(playerDataPoints.keySet().size());
 
 	}
 }

@@ -32,6 +32,10 @@ public class Location implements FromJsonObject<Location>{
         this.z = z;
     }
 
+    public double distanceBetween(Location otherLocation){
+        return Math.sqrt(Math.pow((this.x - otherLocation.getX()), 2.0) + Math.pow((this.y - otherLocation.getY()), 2.0) + Math.pow((this.z - otherLocation.getZ()), 2.0));
+    }
+
     @Override
     public Location fromJSONObject(JSONObject jsonObject) {
         Location location = new Location();
