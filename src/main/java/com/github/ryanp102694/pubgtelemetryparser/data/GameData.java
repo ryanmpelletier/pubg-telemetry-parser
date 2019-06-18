@@ -205,7 +205,7 @@ public class GameData {
         return playerStateMap;
     }
 
-    public PlayerState getStateByPhase(String playerName, String gamePhase){
+    private PlayerState getStateByPhase(String playerName, String gamePhase){
         for(PlayerState playerState : this.getPlayerStateMap().get(playerName)){
             if(playerState.getGamePhase().equals(gamePhase)){
                 return playerState;
@@ -215,7 +215,7 @@ public class GameData {
     }
 
 
-    public Map<String,PlayerState> getStatesByPhase(String gamePhase){
+    private Map<String,PlayerState> getStatesByPhase(String gamePhase){
         Map<String, PlayerState> playerStates = new HashMap<>();
 
         for(String playerName : this.getPlayerStateMap().keySet()){
@@ -229,7 +229,7 @@ public class GameData {
         return playerStates;
     }
 
-    public PlayerState getPlayerState(String playerName, Instant time) {
+    private PlayerState getPlayerState(String playerName, Instant time) {
          List<PlayerState> playerStates = this.getPlayerStateMap().get(playerName);
 
          //return the player state just before the requested time
