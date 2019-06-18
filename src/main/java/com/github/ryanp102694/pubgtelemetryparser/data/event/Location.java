@@ -2,6 +2,12 @@ package com.github.ryanp102694.pubgtelemetryparser.data.event;
 
 import org.json.JSONObject;
 
+
+/**
+ *
+  The range for the X and Y axes is 0 - 816,000 for 8km maps.
+  Location values are measured in centimeters
+ */
 public class Location implements FromJsonObject<Location>{
 
     private double x;

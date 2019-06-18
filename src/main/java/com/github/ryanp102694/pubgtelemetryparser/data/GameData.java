@@ -89,6 +89,7 @@ public class GameData {
             statsMap.put("enemyCountZeroToTwentyFive", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 0.0, 25.0));
             statsMap.put("enemyCountTwentyFiveToFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 25.0, 50.0));
             statsMap.put("enemyCountFiftyToOneHundred", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 50.0, 100.0));
+            statsMap.put("enemyCountOneHundredToTwoFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 100.0, 250.0));
             returnMap.put(startPlayerState.getPlayer().getName(), statsMap);
         }
 
@@ -104,7 +105,7 @@ public class GameData {
 
         for(PlayerState enemyPlayerState : enemyPlayerStates.values()){
             Double distance = playerLocation.distanceBetween(enemyPlayerState.getPlayer().getLocation());
-            if(distance >= minRange && distance < maxRange){
+            if(distance >= (minRange * 100) && distance < (maxRange * 100)){
                 numberOfEnemies++;
             }
         }
@@ -116,7 +117,7 @@ public class GameData {
 
         Location playerLocation = player.getLocation();
         //enemies aren't realistically dangerous from 500 meters away
-        Double closestEnemyDistance = 500000.0;
+        Double closestEnemyDistance = 50000.0;
 
         for(PlayerState enemyPlayerState : enemyPlayerStates.values()){
             closestEnemyDistance = Math.min(closestEnemyDistance, playerLocation.distanceBetween(enemyPlayerState.getPlayer().getLocation()));
@@ -139,7 +140,7 @@ public class GameData {
         Location playerLocation = player.getLocation();
 
         //~500 meters, your teammate will likely not be much help to you this far away
-        Double nearestNeighbor = 500000.0;
+        Double nearestNeighbor = 50000.0;
 
         for(PlayerState teamMemberState : teamMemberStates.values()){
             nearestNeighbor = Math.min(nearestNeighbor, playerLocation.distanceBetween(teamMemberState.getPlayer().getLocation()));
@@ -188,7 +189,7 @@ public class GameData {
     private Map<String, PlayerState> getTeamMemberStatesByGamePhase(Player player, String gamePhase){
 
         Map<String, PlayerState> playerStateMap = new HashMap<>();
-        Set<String> teamMembers = this.teamData.get(player.getTeamId());
+        Set<String> teamMembers = new HashSet<>(this.teamData.get(player.getTeamId()));
         teamMembers.remove(player.getName());
 
         for(String teamMemberName : teamMembers){
