@@ -1,8 +1,6 @@
 package com.github.ryanp102694.pubgtelemetryparser;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
-import com.github.ryanp102694.pubgtelemetryparser.data.GameState;
-import com.github.ryanp102694.pubgtelemetryparser.data.PlayerState;
 import com.github.ryanp102694.pubgtelemetryparser.event.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -83,8 +81,8 @@ public class PubgTelemetryParserApplication implements CommandLineRunner {
 
 		Instant gameStart = gameData.getStartTime();
 
-		GameDataWrite gameDataWrite = new GameDataWrite();
-		gameDataWrite.writeGameDataPoints(gameData);
+		GameDataWriter gameDataWriter = new GameDataWriter();
+		gameDataWriter.writeGameDataPoints(gameData);
 
 	}
 }

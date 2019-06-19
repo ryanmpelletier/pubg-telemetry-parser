@@ -66,8 +66,8 @@ public class GameData {
         this.playerStateMap = playerStateMap;
     }
 
-    public Map<String, Map<String, String>> getPlayerDataPoints(String gamePhase){
-        Map<String, Map<String, String>> returnMap = new HashMap<>();
+    public Map<String, SortedMap<String, String>> getPlayerDataPoints(String gamePhase){
+        Map<String, SortedMap<String, String>> returnMap = new HashMap<>();
         Map<String, PlayerState> startPhaseStates = getStatesByPhase(gamePhase);
         Map<String, PlayerState> nextPhaseStates = getStatesByPhase(String.valueOf(Double.parseDouble(gamePhase) + 1.0));
 
@@ -77,11 +77,11 @@ public class GameData {
             PlayerState startPlayerState = startPhaseStates.get(playerName);
 
 
-            Map<String, String> statsMap = new HashMap<>();
+            SortedMap<String, String> statsMap = new TreeMap<>();
 
             //if we don't have an entry in the next state, they dead
             statsMap.put("alive", nextPhaseStates.get(playerName) == null ? "0" : "1");
-            statsMap.put("numAliveTeamMembers", String.valueOf(calculateAliveTeammates(startPlayerState.getPlayer().getTeamId(), startPlayerState.getPlayer().getName(), gamePhase)));
+            statsMap.put("numAliveTeamMembers", calculateAliveTeammates(startPlayerState.getPlayer().getTeamId(), startPlayerState.getPlayer().getName(), gamePhase));
             statsMap.put("nearestTeamMember", calculateNearestTeamMember(startPlayerState.getPlayer(), gamePhase));
             statsMap.put("distanceToSafeZone", calculateDistanceToSafeZone(startPlayerState.getPlayer(), gamePhase));
             statsMap.put("safeZoneRadius", calculateSafeZoneRadius(gamePhase));
@@ -122,16 +122,16 @@ public class GameData {
         for(PlayerState enemyPlayerState : enemyPlayerStates.values()){
             closestEnemyDistance = Math.min(closestEnemyDistance, playerLocation.distanceBetween(enemyPlayerState.getPlayer().getLocation()));
         }
-        return String.valueOf(closestEnemyDistance);
+        return String.format("%.2f", closestEnemyDistance);
     }
 
     private String calculateSafeZoneRadius(String gamePhase){
-        return String.valueOf(getGameStateByPhase(gamePhase).getSafetyZoneRadius());
+        return String.format("%.2f", getGameStateByPhase(gamePhase).getSafetyZoneRadius());
     }
 
     private String calculateDistanceToSafeZone(Player player, String gamePhase){
         GameState gameState = getGameStateByPhase(gamePhase);
-        return String.valueOf(gameState.getSafetyZonePosition().distanceBetween(player.getLocation()));
+        return String.format("%.2f", (gameState.getSafetyZonePosition().distanceBetween(player.getLocation())));
     }
 
     private String calculateNearestTeamMember(Player player, String gamePhase){
@@ -146,7 +146,7 @@ public class GameData {
             nearestNeighbor = Math.min(nearestNeighbor, playerLocation.distanceBetween(teamMemberState.getPlayer().getLocation()));
         }
 
-        return String.valueOf(nearestNeighbor);
+        return String.format("%.2f", nearestNeighbor);
     }
 
     private String calculateAliveTeammates(int teamNumber, String playerName, String isGame){
