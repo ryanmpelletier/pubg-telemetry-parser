@@ -1,6 +1,7 @@
 package com.github.ryanp102694.pubgtelemetryparser;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
+import com.github.ryanp102694.pubgtelemetryparser.data.GameDataWriter;
 import com.github.ryanp102694.pubgtelemetryparser.event.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -42,47 +43,25 @@ public class PubgTelemetryParserApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
-		GameData gameData = new GameData();
-
 		TelemetryEventHandler matchDefinitionHandler = new MatchDefinitionEventHandler();
 		TelemetryEventHandler matchStartEventHandler = new MatchStartEventHandler();
 		TelemetryEventHandler playerPositionEventHandler = new PlayerPositionEventHandler();
 		TelemetryEventHandler parachuteLandingEventHandler = new ParachuteLandingEventHandler();
 		TelemetryEventHandler gameStatePeriodicEventHandler = new GameStatePeriodicEventHandler();
 
+		Map<String, TelemetryEventHandler> telemetryEventHandlerMap = new HashMap<>();
 
-		String jsonString = new String(Files.readAllBytes(Paths.get("telemetry.json")));
-		JSONArray telemetryEvents = new JSONArray(jsonString);
-		Set<String> eventTypes = new TreeSet<>();
+		telemetryEventHandlerMap.put("LogMatchDefinition", matchDefinitionHandler);
+		telemetryEventHandlerMap.put("LogMatchStart", matchStartEventHandler);
+		telemetryEventHandlerMap.put("LogPlayerPosition", playerPositionEventHandler);
+		telemetryEventHandlerMap.put("LogParachuteLanding", parachuteLandingEventHandler);
+		telemetryEventHandlerMap.put("LogGameStatePeriodic", gameStatePeriodicEventHandler);
 
-		for(int i = 0; i < telemetryEvents.length(); i++){
-			JSONObject telemetryEvent = telemetryEvents.getJSONObject(i);
+		TelemetryProcessor telemetryProcessor = new TelemetryProcessor();
+		telemetryProcessor.setOutputDirectory(".");
+		telemetryProcessor.setTelemetryFileName("telemetry.json");
+		telemetryProcessor.setTelemetryEventHandlerMap(telemetryEventHandlerMap);
 
-			String eventType = telemetryEvent.getString("_T");
-			eventTypes.add(eventType);
-
-			Map<Integer, Set<String>> teams = null;
-
-
-			//can probably throw lots of things out until the match starts
-			if("LogMatchDefinition".equals(eventType)){
-				matchDefinitionHandler.handle(telemetryEvent, gameData);
-			}else if("LogMatchStart".equals(eventType)){
-				matchStartEventHandler.handle(telemetryEvent, gameData);
-			}else if("LogParachuteLanding".equals(eventType)){
-				parachuteLandingEventHandler.handle(telemetryEvent, gameData);
-			}else if("LogPlayerPosition".equals(eventType)){
-				playerPositionEventHandler.handle(telemetryEvent, gameData);
-			}else if("LogGameStatePeriodic".equals(eventType)){
-				gameStatePeriodicEventHandler.handle(telemetryEvent, gameData);
-			}
-
-		}
-
-		Instant gameStart = gameData.getStartTime();
-
-		GameDataWriter gameDataWriter = new GameDataWriter();
-		gameDataWriter.writeGameDataPoints(gameData);
-
+		new Thread(telemetryProcessor).run();
 	}
 }

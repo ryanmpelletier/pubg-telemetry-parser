@@ -1,4 +1,4 @@
-package com.github.ryanp102694.pubgtelemetryparser;
+package com.github.ryanp102694.pubgtelemetryparser.data;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
 
