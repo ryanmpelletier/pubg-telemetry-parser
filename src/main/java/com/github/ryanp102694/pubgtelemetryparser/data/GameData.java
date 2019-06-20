@@ -25,6 +25,11 @@ public class GameData {
     private Map<Integer, Set<String>> teamData;
     private Map<String, List<PlayerState>> playerStateMap;
 
+    //if there are more than this many enemies in a zone, we'll just record 15, which will make the data easier to normalize
+    static int ENEMY_NUMBER_CAP = 15;
+    static double NEAREST_TEAM_MEMBER_CAP = 50000.0;
+    static double NEAREST_ENEMY_CAP = 50000.0;
+
 
     public String getGameId() {
         return gameId;
@@ -84,7 +89,8 @@ public class GameData {
             statsMap.put("numAliveTeamMembers", calculateAliveTeammates(startPlayerState.getPlayer().getTeamId(), startPlayerState.getPlayer().getName(), gamePhase));
             statsMap.put("nearestTeamMember", calculateNearestTeamMember(startPlayerState.getPlayer(), gamePhase));
             statsMap.put("distanceToSafeZone", calculateDistanceToSafeZone(startPlayerState.getPlayer(), gamePhase));
-            statsMap.put("safeZoneRadius", calculateSafeZoneRadius(gamePhase));
+            //safezone radius will not matter until we build our network to span multiple zones
+            //            statsMap.put("safeZoneRadius", calculateSafeZoneRadius(gamePhase));
             statsMap.put("closestEnemyDistance", calculateClosestEnemyDistance(startPlayerState.getPlayer(), gamePhase));
             statsMap.put("enemyCountZeroToTwentyFive", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 0.0, 25.0));
             statsMap.put("enemyCountTwentyFiveToFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 25.0, 50.0));
@@ -100,7 +106,6 @@ public class GameData {
         Map<String, PlayerState> enemyPlayerStates = getEnemyStatesByGamePhase(player, gamePhase);
 
         Location playerLocation = player.getLocation();
-        //enemies aren't realistically dangerous from 500 meters away
         Integer numberOfEnemies = 0;
 
         for(PlayerState enemyPlayerState : enemyPlayerStates.values()){
@@ -109,7 +114,7 @@ public class GameData {
                 numberOfEnemies++;
             }
         }
-        return String.valueOf(numberOfEnemies);
+        return String.valueOf(Math.min(numberOfEnemies, ENEMY_NUMBER_CAP));
     }
 
     private String calculateClosestEnemyDistance(Player player, String gamePhase){
@@ -117,7 +122,7 @@ public class GameData {
 
         Location playerLocation = player.getLocation();
         //enemies aren't realistically dangerous from 500 meters away
-        Double closestEnemyDistance = 50000.0;
+        Double closestEnemyDistance = NEAREST_ENEMY_CAP;
 
         for(PlayerState enemyPlayerState : enemyPlayerStates.values()){
             closestEnemyDistance = Math.min(closestEnemyDistance, playerLocation.distanceBetween(enemyPlayerState.getPlayer().getLocation()));
@@ -131,7 +136,10 @@ public class GameData {
 
     private String calculateDistanceToSafeZone(Player player, String gamePhase){
         GameState gameState = getGameStateByPhase(gamePhase);
-        return String.format("%.2f", (gameState.getSafetyZonePosition().distanceBetween(player.getLocation())));
+
+        Location safetyZonePosition = gameState.getSafetyZonePosition();
+        Location playerLocation = player.getLocation();
+        return String.format("%.2f", (safetyZonePosition.distanceBetween(playerLocation) - gameState.getSafetyZoneRadius()));
     }
 
     private String calculateNearestTeamMember(Player player, String gamePhase){
@@ -140,7 +148,7 @@ public class GameData {
         Location playerLocation = player.getLocation();
 
         //~500 meters, your teammate will likely not be much help to you this far away
-        Double nearestNeighbor = 50000.0;
+        Double nearestNeighbor = NEAREST_TEAM_MEMBER_CAP;
 
         for(PlayerState teamMemberState : teamMemberStates.values()){
             nearestNeighbor = Math.min(nearestNeighbor, playerLocation.distanceBetween(teamMemberState.getPlayer().getLocation()));
