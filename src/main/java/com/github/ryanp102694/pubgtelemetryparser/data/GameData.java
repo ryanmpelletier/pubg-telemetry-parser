@@ -86,12 +86,22 @@ public class GameData {
 
             //if we don't have an entry in the next state, they dead
             statsMap.put("alive", nextPhaseStates.get(playerName) == null ? "0" : "1");
+
+            //return between 0 and 3
             statsMap.put("numAliveTeamMembers", calculateAliveTeammates(startPlayerState.getPlayer().getTeamId(), startPlayerState.getPlayer().getName(), gamePhase));
+
+            //return number between 0 and NEAREST_TEAM_MEMBER_CAP
             statsMap.put("nearestTeamMember", calculateNearestTeamMember(startPlayerState.getPlayer(), gamePhase));
+
+            //number between 0 and 816,000
             statsMap.put("distanceToSafeZone", calculateDistanceToSafeZone(startPlayerState.getPlayer(), gamePhase));
             //safezone radius will not matter until we build our network to span multiple zones
             //            statsMap.put("safeZoneRadius", calculateSafeZoneRadius(gamePhase));
+
+            //will return number between 0 and NEAREST_ENEMY_CAP
             statsMap.put("closestEnemyDistance", calculateClosestEnemyDistance(startPlayerState.getPlayer(), gamePhase));
+
+            //will return number between 0 and ENEMY_NUMBER_CAP
             statsMap.put("enemyCountZeroToTwentyFive", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 0.0, 25.0));
             statsMap.put("enemyCountTwentyFiveToFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 25.0, 50.0));
             statsMap.put("enemyCountFiftyToOneHundred", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 50.0, 100.0));
