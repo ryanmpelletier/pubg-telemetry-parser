@@ -39,7 +39,13 @@ public class GameDataWriter {
 
             for(String key : dataPoints.keySet()){
                 if("alive".equals(key)){
-                    labelBuilder.append(dataPoints.get(key));
+		    String otherString = "";
+		    if("1".equals(dataPoints.get(key))){
+		      otherString = "0";
+		    }else{
+		      otherString = "1";
+		    }
+                    labelBuilder.append(dataPoints.get(key) + "," + otherString);
                 }else{
                     trainingDataBuilder.append(dataPoints.get(key) + ",");
                 }
