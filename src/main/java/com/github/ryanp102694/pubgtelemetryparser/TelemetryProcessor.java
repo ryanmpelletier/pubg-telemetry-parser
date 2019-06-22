@@ -5,6 +5,8 @@ import com.github.ryanp102694.pubgtelemetryparser.data.GameDataWriter;
 import com.github.ryanp102694.pubgtelemetryparser.event.TelemetryEventHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +14,8 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 public class TelemetryProcessor implements Runnable {
+
+    private final static Logger log = LoggerFactory.getLogger(BatchTelemetryProcessor.class);
 
     private String telemetryFileName;
     private String outputDirectory = ".";
@@ -22,11 +26,20 @@ public class TelemetryProcessor implements Runnable {
         this.gameData = new GameData();
     }
 
+    public TelemetryProcessor(String telemetryFileName, String outputDirectory, Map<String, TelemetryEventHandler> telemetryEventHandlerMap){
+        this.telemetryFileName = telemetryFileName;
+        this.outputDirectory = outputDirectory;
+        this.telemetryEventHandlerMap = telemetryEventHandlerMap;
+        this.gameData = new GameData();
+    }
+
     @Override
     public void run() {
+
         JSONArray telemetryEvents = null;
 
         try{
+            log.info("Begin processing " + telemetryFileName + " events");
             String jsonString = new String(Files.readAllBytes(Paths.get(telemetryFileName)));
             telemetryEvents = new JSONArray(jsonString);
             for(int i = 0; i < telemetryEvents.length(); i++) {
@@ -38,7 +51,8 @@ public class TelemetryProcessor implements Runnable {
                 }
             }
 
-            GameDataWriter gameDataWriter = new GameDataWriter();
+            log.info("Stop processing " + telemetryFileName + " events");
+            GameDataWriter gameDataWriter = new GameDataWriter(outputDirectory);
             gameDataWriter.writeGameDataPoints(this.gameData);
         }catch(IOException e){
             throw new RuntimeException(e);

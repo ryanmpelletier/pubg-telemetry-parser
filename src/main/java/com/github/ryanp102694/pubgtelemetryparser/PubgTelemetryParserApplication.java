@@ -57,11 +57,14 @@ public class PubgTelemetryParserApplication implements CommandLineRunner {
 		telemetryEventHandlerMap.put("LogParachuteLanding", parachuteLandingEventHandler);
 		telemetryEventHandlerMap.put("LogGameStatePeriodic", gameStatePeriodicEventHandler);
 
-		TelemetryProcessor telemetryProcessor = new TelemetryProcessor();
-		telemetryProcessor.setOutputDirectory(".");
-		telemetryProcessor.setTelemetryFileName("telemetry.json");
-		telemetryProcessor.setTelemetryEventHandlerMap(telemetryEventHandlerMap);
+//		TelemetryProcessor telemetryProcessor = new TelemetryProcessor();
+//		telemetryProcessor.setOutputDirectory(".");
+//		telemetryProcessor.setTelemetryFileName("telemetry.json");
+//		telemetryProcessor.setTelemetryEventHandlerMap(telemetryEventHandlerMap);
+//
+//		new Thread(telemetryProcessor).run();
 
-		new Thread(telemetryProcessor).run();
+		BatchTelemetryProcessor batchTelemetryProcessor = new BatchTelemetryProcessor(telemetryEventHandlerMap);
+		batchTelemetryProcessor.process("/home/rpelletier/workspace/pubg/erangel_telemetry/squad-fpp", "/home/rpelletier/workspace/pubg/data");
 	}
 }

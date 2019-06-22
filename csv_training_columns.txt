@@ -1,0 +1,8 @@
+"closestEnemyDistance"
+"distanceToSafeZone"
+"enemyCountFiftyToOneHundred"
+"enemyCountOneHundredToTwoFifty"
+"enemyCountTwentyFiveToFifty"
+"enemyCountZeroToTwentyFive"
+"nearestTeamMember"
+"numAliveTeamMembers"

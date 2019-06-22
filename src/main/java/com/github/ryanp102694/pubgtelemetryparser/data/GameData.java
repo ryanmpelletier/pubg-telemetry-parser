@@ -29,6 +29,7 @@ public class GameData {
     static int ENEMY_NUMBER_CAP = 15;
     static double NEAREST_TEAM_MEMBER_CAP = 50000.0;
     static double NEAREST_ENEMY_CAP = 50000.0;
+    static double DISTANCE_TO_SAFE_ZONE_CAP = 250000.0;
 
 
     public String getGameId() {
@@ -88,35 +89,37 @@ public class GameData {
             statsMap.put("alive", nextPhaseStates.get(playerName) == null ? "0" : "1");
 
             //return between 0 and 3
-            statsMap.put("numAliveTeamMembers", calculateAliveTeammates(startPlayerState.getPlayer().getTeamId(), startPlayerState.getPlayer().getName(), gamePhase));
+            statsMap.put("numAliveTeamMembers", calculateAliveTeammates(startPlayerState.getPlayer().getTeamId(), startPlayerState.getPlayer().getName(), gamePhase, new RangeMapper(0.0, 3.0)));
 
             //return number between 0 and NEAREST_TEAM_MEMBER_CAP
-            statsMap.put("nearestTeamMember", calculateNearestTeamMember(startPlayerState.getPlayer(), gamePhase));
+            statsMap.put("nearestTeamMember", calculateNearestTeamMember(startPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, NEAREST_TEAM_MEMBER_CAP)));
 
-            //number between 0 and 816,000
-            statsMap.put("distanceToSafeZone", calculateDistanceToSafeZone(startPlayerState.getPlayer(), gamePhase));
+            //number between 0 and DISTANCE_TO_SAFE_ZONE_CAP
+            statsMap.put("distanceToSafeZone", calculateDistanceToSafeZone(startPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, DISTANCE_TO_SAFE_ZONE_CAP)));
             //safezone radius will not matter until we build our network to span multiple zones
             //            statsMap.put("safeZoneRadius", calculateSafeZoneRadius(gamePhase));
 
             //will return number between 0 and NEAREST_ENEMY_CAP
-            statsMap.put("closestEnemyDistance", calculateClosestEnemyDistance(startPlayerState.getPlayer(), gamePhase));
+            statsMap.put("closestEnemyDistance", calculateClosestEnemyDistance(startPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, NEAREST_ENEMY_CAP)));
+
+            RangeMapper enemyRangeMapper = new RangeMapper(0.0, ENEMY_NUMBER_CAP);
 
             //will return number between 0 and ENEMY_NUMBER_CAP
-            statsMap.put("enemyCountZeroToTwentyFive", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 0.0, 25.0));
-            statsMap.put("enemyCountTwentyFiveToFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 25.0, 50.0));
-            statsMap.put("enemyCountFiftyToOneHundred", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 50.0, 100.0));
-            statsMap.put("enemyCountOneHundredToTwoFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 100.0, 250.0));
+            statsMap.put("enemyCountZeroToTwentyFive", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 0.0, 25.0, enemyRangeMapper));
+            statsMap.put("enemyCountTwentyFiveToFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 25.0, 50.0, enemyRangeMapper));
+            statsMap.put("enemyCountFiftyToOneHundred", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 50.0, 100.0, enemyRangeMapper));
+            statsMap.put("enemyCountOneHundredToTwoFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 100.0, 250.0, enemyRangeMapper));
             returnMap.put(startPlayerState.getPlayer().getName(), statsMap);
         }
 
         return returnMap;
     }
 
-    private String calculateEnemiesWithinDistance(Player player, String gamePhase, Double minRange, Double maxRange){
+    private String calculateEnemiesWithinDistance(Player player, String gamePhase, Double minRange, Double maxRange, RangeMapper rangeMapper){
         Map<String, PlayerState> enemyPlayerStates = getEnemyStatesByGamePhase(player, gamePhase);
 
         Location playerLocation = player.getLocation();
-        Integer numberOfEnemies = 0;
+        Double numberOfEnemies = 0.0;
 
         for(PlayerState enemyPlayerState : enemyPlayerStates.values()){
             Double distance = playerLocation.distanceBetween(enemyPlayerState.getPlayer().getLocation());
@@ -124,10 +127,10 @@ public class GameData {
                 numberOfEnemies++;
             }
         }
-        return String.valueOf(Math.min(numberOfEnemies, ENEMY_NUMBER_CAP));
+        return String.format("%.2f", rangeMapper.apply(Math.min(numberOfEnemies, ENEMY_NUMBER_CAP)));
     }
 
-    private String calculateClosestEnemyDistance(Player player, String gamePhase){
+    private String calculateClosestEnemyDistance(Player player, String gamePhase, RangeMapper rangeMapper){
         Map<String, PlayerState> enemyPlayerStates = getEnemyStatesByGamePhase(player, gamePhase);
 
         Location playerLocation = player.getLocation();
@@ -137,22 +140,26 @@ public class GameData {
         for(PlayerState enemyPlayerState : enemyPlayerStates.values()){
             closestEnemyDistance = Math.min(closestEnemyDistance, playerLocation.distanceBetween(enemyPlayerState.getPlayer().getLocation()));
         }
-        return String.format("%.2f", closestEnemyDistance);
+        return String.format("%.2f", rangeMapper.apply(closestEnemyDistance));
     }
 
     private String calculateSafeZoneRadius(String gamePhase){
         return String.format("%.2f", getGameStateByPhase(gamePhase).getSafetyZoneRadius());
     }
 
-    private String calculateDistanceToSafeZone(Player player, String gamePhase){
+    private String calculateDistanceToSafeZone(Player player, String gamePhase, RangeMapper rangeMapper){
         GameState gameState = getGameStateByPhase(gamePhase);
 
         Location safetyZonePosition = gameState.getSafetyZonePosition();
         Location playerLocation = player.getLocation();
-        return String.format("%.2f", (safetyZonePosition.distanceBetween(playerLocation) - gameState.getSafetyZoneRadius()));
+
+        Double distance = Math.max(safetyZonePosition.distanceBetween(playerLocation) - gameState.getSafetyZoneRadius(), 0.0);
+        Double boundedDistance = Math.min(DISTANCE_TO_SAFE_ZONE_CAP, distance);
+
+        return String.format("%.2f", rangeMapper.apply((boundedDistance)));
     }
 
-    private String calculateNearestTeamMember(Player player, String gamePhase){
+    private String calculateNearestTeamMember(Player player, String gamePhase, RangeMapper rangeMapper){
         Map<String, PlayerState> teamMemberStates = getTeamMemberStatesByGamePhase(player, gamePhase);
 
         Location playerLocation = player.getLocation();
@@ -164,18 +171,18 @@ public class GameData {
             nearestNeighbor = Math.min(nearestNeighbor, playerLocation.distanceBetween(teamMemberState.getPlayer().getLocation()));
         }
 
-        return String.format("%.2f", nearestNeighbor);
+        return String.format("%.2f", rangeMapper.apply(nearestNeighbor));
     }
 
-    private String calculateAliveTeammates(int teamNumber, String playerName, String isGame){
+    private String calculateAliveTeammates(int teamNumber, String playerName, String isGame, RangeMapper rangeMapper){
         Set<String> teamMembers = this.teamData.get(teamNumber);
-        int aliveTeammates = 0;
+        Double aliveTeammates = 0.0;
         for(String teamMember : teamMembers){
             if(getStateByPhase(teamMember, isGame) != null && !teamMember.equals(playerName)){
                 aliveTeammates++;
             }
         }
-        return String.valueOf(aliveTeammates);
+        return String.format("%.2f", rangeMapper.apply(aliveTeammates));
     }
 
     private GameState getGameStateByPhase(String gamePhase){

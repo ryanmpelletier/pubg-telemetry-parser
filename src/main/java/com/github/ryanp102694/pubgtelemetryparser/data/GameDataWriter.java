@@ -1,6 +1,8 @@
 package com.github.ryanp102694.pubgtelemetryparser.data;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -8,6 +10,8 @@ import java.io.IOException;
 import java.util.*;
 
 public class GameDataWriter {
+
+    private final static Logger log = LoggerFactory.getLogger(GameDataWriter.class);
 
     private String outputDir = ".";
 

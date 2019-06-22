@@ -10,6 +10,10 @@ public class RangeMapper implements Function<Double, Double> {
     private double outputUpperBound;
 
 
+    public RangeMapper(double inputLowerBound, double inputUpperBound){
+        this(inputLowerBound, inputUpperBound, 0.0, 1.0);
+    }
+
     public RangeMapper(double inputLowerBound, double inputUpperBound, double outputLowerBound, double outputUpperBound){
         this.inputLowerBound= inputLowerBound;
         this.inputUpperBound = inputUpperBound;
