@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
-public class TelemetryProcessor implements Runnable {
+public class TelemetryProcessor {
 
     private final static Logger log = LoggerFactory.getLogger(BatchTelemetryProcessor.class);
 
@@ -33,13 +33,11 @@ public class TelemetryProcessor implements Runnable {
         this.gameData = new GameData();
     }
 
-    @Override
-    public void run() {
+    public void process() {
 
         JSONArray telemetryEvents = null;
 
         try{
-            log.info("Begin processing " + telemetryFileName + " events");
             String jsonString = new String(Files.readAllBytes(Paths.get(telemetryFileName)));
             telemetryEvents = new JSONArray(jsonString);
             for(int i = 0; i < telemetryEvents.length(); i++) {
@@ -51,7 +49,6 @@ public class TelemetryProcessor implements Runnable {
                 }
             }
 
-            log.info("Stop processing " + telemetryFileName + " events");
             GameDataWriter gameDataWriter = new GameDataWriter(outputDirectory);
             gameDataWriter.writeGameDataPoints(this.gameData);
         }catch(IOException e){

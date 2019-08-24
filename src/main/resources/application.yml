@@ -2,4 +2,7 @@ logging:
   level:
     ROOT: INFO
     com.github.ryanp102694: DEBUG
+build.training.data: false
+telemetry.input.dir: "/home/rpelletier/workspace/pubg_ml/erangel_telemetry/squad-fpp"
+data.output.dir: "./training_data"
 

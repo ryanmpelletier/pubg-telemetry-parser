@@ -1,49 +1,46 @@
 package com.github.ryanp102694.pubgtelemetryparser;
 
-import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
-import com.github.ryanp102694.pubgtelemetryparser.data.GameDataWriter;
-import com.github.ryanp102694.pubgtelemetryparser.event.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
+import java.io.File;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.*;
 
 
 /*
  *
- * I'm going to want to build some "global" objects that I can reference.
- * (teamMap for looking up team info, gameState for looking up circle, packages, zones, etc)
- *
- * I want to basically iterate through all of the events and have handlers events. Not every event will have a handler. The handler
- * will be passed the teamMap, gameState, and potentially other info. The handler should have a list of keys for data points
- * that it calculates and can attach to playerState objects. The handler logic may update multiple playerState objects as it sees fit.
- *
- * The handler will then create new playerState objects. The player state objects should be able to hold arbitrary
- * data about the player, which will ultimately be used to build my csv training data.
- *
- * I want to be able to grab the state at any arbitrary time for any player. So I wil
- *
- *
- * Map<String, List<PlayerState>>    <---- this object will hold the data for players, the PlayerState can be updated as events are iterated
  *
  */
 @SpringBootApplication
+@EnableAsync
 public class PubgTelemetryParserApplication implements CommandLineRunner {
+
+	@Value("${build.training.data}")
+	Boolean buildTrainingData;
+
+	@Value("${telemetry.input.dir}")
+	String telemetryInputDirectory;
+
+	@Autowired
+	BatchTelemetryProcessor batchTelemetryProcessor;
 
 	public static void main(String[] args) {
 		SpringApplication.run(PubgTelemetryParserApplication.class, args);
 	}
 
 	@Override
-	public void run(String... args) throws Exception {
-
-		BatchTelemetryProcessor batchTelemetryProcessor = new BatchTelemetryProcessor();
-		batchTelemetryProcessor.process("/home/rpelletier/workspace/pubg/erangel_telemetry/squad-fpp", "/home/rpelletier/workspace/pubg/data");
+	public void run(String... args) {
+		if(buildTrainingData){
+			File folder = new File(telemetryInputDirectory);
+			for(File telemetryFile : folder.listFiles()){
+				if (telemetryFile.isFile()) {
+					batchTelemetryProcessor.process(telemetryFile.getAbsolutePath());
+				}
+			}
+		}
 	}
 }

@@ -3,17 +3,19 @@ package com.github.ryanp102694.pubgtelemetryparser;
 import com.github.ryanp102694.pubgtelemetryparser.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
+
+@Component
 public class BatchTelemetryProcessor {
+
+    @Value("${data.output.dir}")
+    private String dataOutputDir;
 
     private final static Logger log = LoggerFactory.getLogger(BatchTelemetryProcessor.class);
 
@@ -29,42 +31,12 @@ public class BatchTelemetryProcessor {
         this.telemetryEventHandlerMap = telemetryEventHandlerMap;
     }
 
-    //will build several TelemetryParsers then process them on separate threads
-    public void process(String inputDir, String outputDir){
-        File folder = new File(inputDir);
-        File[] listOfFiles = folder.listFiles();
-
-        List<TelemetryProcessor> telemetryProcessors = new ArrayList<>();
-
-
-        if(listOfFiles != null){
-            for(int i = 0; i < listOfFiles.length; i++){
-                if (listOfFiles[i].isFile()) {
-                    log.debug("Found file " + listOfFiles[i].getAbsoluteFile().getName());
-                    telemetryProcessors.add(new TelemetryProcessor(listOfFiles[i].getAbsoluteFile().getPath(), outputDir, telemetryEventHandlerMap));
-                }
-            }
-        }else{
-            log.error("No files found in " + inputDir + ", not processing.");
-        }
-
-        ExecutorService executor = Executors.newFixedThreadPool(8);
-
-
+    @Async
+    public void process(String telemetryFilePath){
         long startTime = System.currentTimeMillis();
-        log.info("Begin processing " + telemetryProcessors.size() + " telemetry files!");
-        for(TelemetryProcessor telemetryProcessor : telemetryProcessors){
-            executor.execute(telemetryProcessor);
-        }
-        //don't accept any more tasks
-        executor.shutdown();
-        try {
-            //wait for the current tasks to finish
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            log.info("End processing " + telemetryProcessors.size() + " telemetry files in " + (System.currentTimeMillis() - startTime) + " milliseconds");
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        log.debug("Begin processing {}", telemetryFilePath);
+        new TelemetryProcessor(telemetryFilePath, dataOutputDir, telemetryEventHandlerMap).process();
+        log.debug("End processing {}, took {} milliseconds", telemetryFilePath, startTime - System.currentTimeMillis());
     }
 
     public void setTelemetryEventHandlerMap(Map<String, TelemetryEventHandler> telemetryEventHandlerMap) {
