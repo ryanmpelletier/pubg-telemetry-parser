@@ -43,28 +43,7 @@ public class PubgTelemetryParserApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
-		TelemetryEventHandler matchDefinitionHandler = new MatchDefinitionEventHandler();
-		TelemetryEventHandler matchStartEventHandler = new MatchStartEventHandler();
-		TelemetryEventHandler playerPositionEventHandler = new PlayerPositionEventHandler();
-		TelemetryEventHandler parachuteLandingEventHandler = new ParachuteLandingEventHandler();
-		TelemetryEventHandler gameStatePeriodicEventHandler = new GameStatePeriodicEventHandler();
-
-		Map<String, TelemetryEventHandler> telemetryEventHandlerMap = new HashMap<>();
-
-		telemetryEventHandlerMap.put("LogMatchDefinition", matchDefinitionHandler);
-		telemetryEventHandlerMap.put("LogMatchStart", matchStartEventHandler);
-		telemetryEventHandlerMap.put("LogPlayerPosition", playerPositionEventHandler);
-		telemetryEventHandlerMap.put("LogParachuteLanding", parachuteLandingEventHandler);
-		telemetryEventHandlerMap.put("LogGameStatePeriodic", gameStatePeriodicEventHandler);
-
-//		TelemetryProcessor telemetryProcessor = new TelemetryProcessor();
-//		telemetryProcessor.setOutputDirectory(".");
-//		telemetryProcessor.setTelemetryFileName("telemetry.json");
-//		telemetryProcessor.setTelemetryEventHandlerMap(telemetryEventHandlerMap);
-//
-//		new Thread(telemetryProcessor).run();
-
-		BatchTelemetryProcessor batchTelemetryProcessor = new BatchTelemetryProcessor(telemetryEventHandlerMap);
+		BatchTelemetryProcessor batchTelemetryProcessor = new BatchTelemetryProcessor();
 		batchTelemetryProcessor.process("/home/rpelletier/workspace/pubg/erangel_telemetry/squad-fpp", "/home/rpelletier/workspace/pubg/data");
 	}
 }

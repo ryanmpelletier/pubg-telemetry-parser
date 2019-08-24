@@ -1,11 +1,12 @@
 package com.github.ryanp102694.pubgtelemetryparser;
 
-import com.github.ryanp102694.pubgtelemetryparser.event.TelemetryEventHandler;
+import com.github.ryanp102694.pubgtelemetryparser.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -18,8 +19,13 @@ public class BatchTelemetryProcessor {
 
     private Map<String, TelemetryEventHandler> telemetryEventHandlerMap;
 
-
-    public BatchTelemetryProcessor(Map<String, TelemetryEventHandler> telemetryEventHandlerMap){
+    public BatchTelemetryProcessor(){
+        Map<String, TelemetryEventHandler> telemetryEventHandlerMap = new HashMap<>();
+        telemetryEventHandlerMap.put("LogMatchDefinition", new MatchDefinitionEventHandler());
+        telemetryEventHandlerMap.put("LogMatchStart", new MatchStartEventHandler());
+        telemetryEventHandlerMap.put("LogPlayerPosition", new PlayerPositionEventHandler());
+        telemetryEventHandlerMap.put("LogParachuteLanding", new ParachuteLandingEventHandler());
+        telemetryEventHandlerMap.put("LogGameStatePeriodic", new GameStatePeriodicEventHandler());
         this.telemetryEventHandlerMap = telemetryEventHandlerMap;
     }
 
@@ -59,5 +65,9 @@ public class BatchTelemetryProcessor {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void setTelemetryEventHandlerMap(Map<String, TelemetryEventHandler> telemetryEventHandlerMap) {
+        this.telemetryEventHandlerMap = telemetryEventHandlerMap;
     }
 }
