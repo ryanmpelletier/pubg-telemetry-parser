@@ -19,22 +19,17 @@ public class TelemetryProcessor {
 
     private String telemetryFileName;
     private String outputDirectory = ".";
-    private GameData gameData;
     Map<String, TelemetryEventHandler> telemetryEventHandlerMap;
 
-    public TelemetryProcessor(){
-        this.gameData = new GameData();
-    }
 
     public TelemetryProcessor(String telemetryFileName, String outputDirectory, Map<String, TelemetryEventHandler> telemetryEventHandlerMap){
         this.telemetryFileName = telemetryFileName;
         this.outputDirectory = outputDirectory;
         this.telemetryEventHandlerMap = telemetryEventHandlerMap;
-        this.gameData = new GameData();
     }
 
-    public void process() {
-
+    public GameData process() {
+        GameData gameData = new GameData();
         JSONArray telemetryEvents = null;
 
         try{
@@ -45,12 +40,10 @@ public class TelemetryProcessor {
                 String eventType = telemetryEvent.getString("_T");
 
                 if(telemetryEventHandlerMap.get(eventType) != null){
-                    telemetryEventHandlerMap.get(eventType).handle(telemetryEvent, this.gameData);
+                    telemetryEventHandlerMap.get(eventType).handle(telemetryEvent, gameData);
                 }
             }
-
-            GameDataWriter gameDataWriter = new GameDataWriter(outputDirectory);
-            gameDataWriter.writeGameDataPoints(this.gameData);
+            return gameData;
         }catch(IOException e){
             throw new RuntimeException(e);
         }

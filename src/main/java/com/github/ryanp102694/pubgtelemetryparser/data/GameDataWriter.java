@@ -1,6 +1,5 @@
 package com.github.ryanp102694.pubgtelemetryparser.data;
 
-import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

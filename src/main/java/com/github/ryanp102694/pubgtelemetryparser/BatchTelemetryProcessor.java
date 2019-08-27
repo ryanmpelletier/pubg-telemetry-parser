@@ -1,5 +1,7 @@
 package com.github.ryanp102694.pubgtelemetryparser;
 
+import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
+import com.github.ryanp102694.pubgtelemetryparser.data.GameDataWriter;
 import com.github.ryanp102694.pubgtelemetryparser.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +38,15 @@ public class BatchTelemetryProcessor {
     public void process(String telemetryFilePath){
         long startTime = System.currentTimeMillis();
         log.debug("Begin processing {}", telemetryFilePath);
-        new TelemetryProcessor(telemetryFilePath, dataOutputDir, telemetryEventHandlerMap).process();
+        GameData gameData = new TelemetryProcessor(telemetryFilePath, dataOutputDir, telemetryEventHandlerMap).process();
+        GameDataWriter gameDataWriter = new GameDataWriter(dataOutputDir);
+        try{
+            log.debug("Writing data points for {}", telemetryFilePath);
+            gameDataWriter.writeGameDataPoints(gameData);
+        }catch(IOException e){
+            log.error("Error writing data points for {}", telemetryFilePath);
+            e.printStackTrace();
+        }
         log.debug("End processing {}, took {} milliseconds", telemetryFilePath, startTime - System.currentTimeMillis());
     }
 
