@@ -1,75 +1,57 @@
 package com.github.ryanp102694.pubgtelemetryparser;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
-import com.github.ryanp102694.pubgtelemetryparser.data.GameDataWriter;
-import com.github.ryanp102694.pubgtelemetryparser.event.TelemetryEventHandler;
+import com.github.ryanp102694.pubgtelemetryparser.event.*;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
+@Component
 public class TelemetryProcessor {
 
-    private final static Logger log = LoggerFactory.getLogger(BatchTelemetryProcessor.class);
+    private final static Logger log = LoggerFactory.getLogger(TelemetryProcessor.class);
 
-    private String telemetryFileName;
-    private String outputDirectory = ".";
+
     Map<String, TelemetryEventHandler> telemetryEventHandlerMap;
 
-
-    public TelemetryProcessor(String telemetryFileName, String outputDirectory, Map<String, TelemetryEventHandler> telemetryEventHandlerMap){
-        this.telemetryFileName = telemetryFileName;
-        this.outputDirectory = outputDirectory;
+    public TelemetryProcessor(){
+        Map<String, TelemetryEventHandler> telemetryEventHandlerMap = new HashMap<>();
+        telemetryEventHandlerMap.put("LogMatchDefinition", new MatchDefinitionEventHandler());
+        telemetryEventHandlerMap.put("LogMatchStart", new MatchStartEventHandler());
+        telemetryEventHandlerMap.put("LogPlayerPosition", new PlayerPositionEventHandler());
+        telemetryEventHandlerMap.put("LogParachuteLanding", new ParachuteLandingEventHandler());
+        telemetryEventHandlerMap.put("LogGameStatePeriodic", new GameStatePeriodicEventHandler());
         this.telemetryEventHandlerMap = telemetryEventHandlerMap;
     }
 
-    public GameData process() {
+
+    @Async
+    public CompletableFuture<GameData> process(InputStream telemetry) throws IOException {
+        log.debug("Begin processing telemetry");
+        long startTime = System.currentTimeMillis();
         GameData gameData = new GameData();
-        JSONArray telemetryEvents = null;
+        JSONArray telemetryEvents;
+        telemetryEvents = new JSONArray(IOUtils.toString(telemetry, StandardCharsets.UTF_8));
+        for(int i = 0; i < telemetryEvents.length(); i++) {
+            JSONObject telemetryEvent = telemetryEvents.getJSONObject(i);
+            String eventType = telemetryEvent.getString("_T");
 
-        try{
-            String jsonString = new String(Files.readAllBytes(Paths.get(telemetryFileName)));
-            telemetryEvents = new JSONArray(jsonString);
-            for(int i = 0; i < telemetryEvents.length(); i++) {
-                JSONObject telemetryEvent = telemetryEvents.getJSONObject(i);
-                String eventType = telemetryEvent.getString("_T");
-
-                if(telemetryEventHandlerMap.get(eventType) != null){
-                    telemetryEventHandlerMap.get(eventType).handle(telemetryEvent, gameData);
-                }
+            if(telemetryEventHandlerMap.get(eventType) != null){
+                telemetryEventHandlerMap.get(eventType).handle(telemetryEvent, gameData);
             }
-            return gameData;
-        }catch(IOException e){
-            throw new RuntimeException(e);
         }
-    }
-
-    public String getTelemetryFileName() {
-        return telemetryFileName;
-    }
-
-    public void setTelemetryFileName(String telemetryFileName) {
-        this.telemetryFileName = telemetryFileName;
-    }
-
-    public String getOutputDirectory() {
-        return outputDirectory;
-    }
-
-    public void setOutputDirectory(String outputDirectory) {
-        this.outputDirectory = outputDirectory;
-    }
-
-    public Map<String, TelemetryEventHandler> getTelemetryEventHandlerMap() {
-        return telemetryEventHandlerMap;
-    }
-
-    public void setTelemetryEventHandlerMap(Map<String, TelemetryEventHandler> telemetryEventHandlerMap) {
-        this.telemetryEventHandlerMap = telemetryEventHandlerMap;
+        log.debug("End processing, took {} milliseconds", System.currentTimeMillis() - startTime);
+        return CompletableFuture.completedFuture(gameData);
     }
 }

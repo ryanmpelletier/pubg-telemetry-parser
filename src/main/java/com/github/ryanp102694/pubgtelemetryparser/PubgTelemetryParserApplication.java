@@ -7,8 +7,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
-import java.io.File;
 
+import java.io.IOException;
 
 
 /*
@@ -22,9 +22,6 @@ public class PubgTelemetryParserApplication implements CommandLineRunner {
 	@Value("${build.training.data}")
 	Boolean buildTrainingData;
 
-	@Value("${telemetry.input.dir}")
-	String telemetryInputDirectory;
-
 	@Autowired
 	BatchTelemetryProcessor batchTelemetryProcessor;
 
@@ -35,11 +32,10 @@ public class PubgTelemetryParserApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 		if(buildTrainingData){
-			File folder = new File(telemetryInputDirectory);
-			for(File telemetryFile : folder.listFiles()){
-				if (telemetryFile.isFile()) {
-					batchTelemetryProcessor.process(telemetryFile.getAbsolutePath());
-				}
+			try{
+				batchTelemetryProcessor.process();
+			}catch(IOException e){
+				e.printStackTrace();
 			}
 		}
 	}

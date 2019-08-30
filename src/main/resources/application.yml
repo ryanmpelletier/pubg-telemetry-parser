@@ -1,8 +1,8 @@
 logging:
   level:
-  ROOT: INFO
-  com.github.ryanp102694: DEBUG
-telemetry.input.dir: "/home/rpelletier/workspace/pubg_ml/erangel_telemetry/squad-fpp"
+    ROOT: INFO
+    com.github.ryanp102694: DEBUG
+data.input.dir: "/home/rpelletier/workspace/pubg_ml/erangel_telemetry/squad-fpp"
 data.output.dir: "./training_data"
 
-build.training.data: false
+build.training.data: true
