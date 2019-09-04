@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.zip.GZIPInputStream;
 
 
@@ -20,8 +21,11 @@ import java.util.zip.GZIPInputStream;
 @RequestMapping("pubgml")
 public class PubgPredictionController {
 
-    @Autowired
     TelemetryProcessor telemetryProcessor;
+
+    public PubgPredictionController(@Autowired TelemetryProcessor telemetryProcessor){
+        this.telemetryProcessor = telemetryProcessor;
+    }
 
     @GetMapping("/prediction")
     String getString(@RequestParam("telemetryUrl") String telemetryUrl) throws IOException {
@@ -35,6 +39,8 @@ public class PubgPredictionController {
 
         GameData gameData = telemetryProcessor.process(new GZIPInputStream(new URL(telemetryUrl).openStream())).join();
 
+
+        Map<String, SortedMap<String, String>> playerDataPoints = gameData.getPlayerDataPoints("1.0");
 
         return gameData.getGameId();
     }
