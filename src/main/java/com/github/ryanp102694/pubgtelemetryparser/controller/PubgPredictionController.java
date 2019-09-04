@@ -4,17 +4,17 @@ import com.github.ryanp102694.pubgtelemetryparser.TelemetryProcessor;
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
 import com.github.ryanp102694.pubgtelemetryparser.event.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.UrlResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.zip.GZIPInputStream;
+
 
 @RestController
 @RequestMapping("pubgml")
@@ -33,15 +33,10 @@ public class PubgPredictionController {
         telemetryEventHandlerMap.put("LogParachuteLanding", new ParachuteLandingEventHandler());
         telemetryEventHandlerMap.put("LogGameStatePeriodic", new GameStatePeriodicEventHandler());
 
+        GameData gameData = telemetryProcessor.process(new GZIPInputStream(new URL(telemetryUrl).openStream())).join();
 
-        GameData gameData = telemetryProcessor.process(new UrlResource(telemetryUrl).getInputStream()).join();
 
-
-        //download telemetry file
-        //build query arrays
-        //hit tensorflow model server and get predictions
-        //create response and send to client
-        return "Hello World";
+        return gameData.getGameId();
     }
 
 }
