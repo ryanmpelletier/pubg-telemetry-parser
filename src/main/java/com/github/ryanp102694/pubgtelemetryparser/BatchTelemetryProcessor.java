@@ -1,7 +1,7 @@
 package com.github.ryanp102694.pubgtelemetryparser;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
-import com.github.ryanp102694.pubgtelemetryparser.data.GameDataWriter;
+import com.github.ryanp102694.pubgtelemetryparser.data.TrainingDataWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,17 +11,14 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Component
 public class BatchTelemetryProcessor {
-
-    @Value("${data.output.dir}")
-    private String dataOutputDir;
 
     @Value("${data.input.dir}")
     private String telemetryInputDirectory;
@@ -29,30 +26,44 @@ public class BatchTelemetryProcessor {
     @Autowired
     TelemetryProcessor telemetryProcessor;
 
+    @Autowired
+    TrainingDataWriter trainingDataWriter;
+
     private final static Logger log = LoggerFactory.getLogger(BatchTelemetryProcessor.class);
 
     public BatchTelemetryProcessor(){}
 
-    void process() throws IOException{
-        File folder = new File(telemetryInputDirectory);
-        List<CompletableFuture<GameData>> completableFutures = new ArrayList<>();
-        for(File telemetryFile : folder.listFiles()) {
-            if (telemetryFile.isFile()) {
-                completableFutures.add(telemetryProcessor.process(new FileInputStream(telemetryFile)));
-            }
-        }
+    void process() throws IOException {
 
-        completableFutures.stream()
-                .map(CompletableFuture::join)
-                .forEach(gameData -> {
+        File folder = new File(telemetryInputDirectory);
+        List<GameData> gameDatas =
+                Stream.of(folder.listFiles())
+                .filter(File::isFile)
+                .map(telemetryFile -> {
                     try{
-                        new GameDataWriter(dataOutputDir).writeGameDataPoints(gameData);
+                        return telemetryProcessor.process(new FileInputStream(telemetryFile));
                     }catch(IOException e){
+                        log.debug("There was a problem opening {}", telemetryFile.getAbsolutePath());
                         e.printStackTrace();
                     }
-                });
+                    return null;
+                })
+                .collect(Collectors.toList())
+                .stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
 
-        log.debug("Finished writing data, processed {} telemetry files.", completableFutures.size());
+                gameDatas.stream()
+                        .map(gameData -> trainingDataWriter
+                                .writeGameDataPoints(gameData.getMatchUUID(), gameData.getPlayerDataPoints("1.0")))
+                        .collect(Collectors.toList())
+                        .stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList());
+
+
+
+        log.debug("Finished writing data, processed {} telemetry files.", gameDatas.size());
 
     }
 

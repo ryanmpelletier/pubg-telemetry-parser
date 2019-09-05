@@ -40,6 +40,11 @@ public class GameData {
         this.gameId = gameId;
     }
 
+    public String getMatchUUID(){
+        String[] idParts = gameId.split("\\.");
+        return idParts[idParts.length - 1];
+    }
+
     public Instant getStartTime() {
         return startTime;
     }
