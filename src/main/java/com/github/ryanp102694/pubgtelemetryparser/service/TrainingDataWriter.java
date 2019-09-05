@@ -1,4 +1,4 @@
-package com.github.ryanp102694.pubgtelemetryparser.data;
+package com.github.ryanp102694.pubgtelemetryparser.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

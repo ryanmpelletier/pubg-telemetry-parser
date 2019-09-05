@@ -5,4 +5,6 @@ logging:
 data.input.dir: "/home/rpelletier/workspace/pubg_ml/erangel_telemetry/squad-fpp"
 data.output.dir: "./training_data"
 
-build.training.data: true
+build.training.data: false
+
+prediction.server.url: "http://localhost:5000/batch_predict"

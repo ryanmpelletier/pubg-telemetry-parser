@@ -1,7 +1,7 @@
 package com.github.ryanp102694.pubgtelemetryparser;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
-import com.github.ryanp102694.pubgtelemetryparser.data.TrainingDataWriter;
+import com.github.ryanp102694.pubgtelemetryparser.service.TrainingDataWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

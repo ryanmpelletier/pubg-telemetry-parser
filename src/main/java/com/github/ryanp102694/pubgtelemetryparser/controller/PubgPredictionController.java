@@ -3,7 +3,14 @@ package com.github.ryanp102694.pubgtelemetryparser.controller;
 import com.github.ryanp102694.pubgtelemetryparser.TelemetryProcessor;
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
 import com.github.ryanp102694.pubgtelemetryparser.event.*;
+import com.github.ryanp102694.pubgtelemetryparser.service.PredictionClient;
+import com.github.ryanp102694.pubgtelemetryparser.service.PredictionRequestWriter;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,7 +20,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.zip.GZIPInputStream;
 
 
@@ -22,9 +28,15 @@ import java.util.zip.GZIPInputStream;
 public class PubgPredictionController {
 
     TelemetryProcessor telemetryProcessor;
+    PredictionRequestWriter predictionRequestWriter;
+    PredictionClient predictionClient;
 
-    public PubgPredictionController(@Autowired TelemetryProcessor telemetryProcessor){
+    public PubgPredictionController(@Autowired TelemetryProcessor telemetryProcessor,
+                                    @Autowired PredictionRequestWriter predictionRequestWriter,
+                                    @Autowired PredictionClient predictionClient){
         this.telemetryProcessor = telemetryProcessor;
+        this.predictionRequestWriter = predictionRequestWriter;
+        this.predictionClient = predictionClient;
     }
 
     @GetMapping("/prediction")
@@ -39,10 +51,8 @@ public class PubgPredictionController {
 
         GameData gameData = telemetryProcessor.process(new GZIPInputStream(new URL(telemetryUrl).openStream())).join();
 
-
-        Map<String, SortedMap<String, String>> playerDataPoints = gameData.getPlayerDataPoints("1.0");
-
-        return gameData.getGameId();
+        String jsonPredictionRequest = predictionRequestWriter.getPredictionString(gameData.getPlayerDataPoints("1.0"));
+        return predictionClient.makePrediction(jsonPredictionRequest);
     }
 
 }
