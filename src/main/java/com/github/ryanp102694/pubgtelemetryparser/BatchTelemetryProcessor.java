@@ -1,6 +1,7 @@
 package com.github.ryanp102694.pubgtelemetryparser;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
+import com.github.ryanp102694.pubgtelemetryparser.data.model.TrainingResult;
 import com.github.ryanp102694.pubgtelemetryparser.service.TrainingDataWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,10 @@ public class BatchTelemetryProcessor {
 
     public BatchTelemetryProcessor(){}
 
-    void process() throws IOException {
+    public TrainingResult process() throws IOException {
+
+        TrainingResult trainingResult = new TrainingResult();
+        long startTime = System.currentTimeMillis();
 
         File folder = new File(telemetryInputDirectory);
         List<GameData> gameDatas =
@@ -60,11 +64,13 @@ public class BatchTelemetryProcessor {
                         .stream()
                         .map(CompletableFuture::join)
                         .collect(Collectors.toList());
-
-
-
         log.debug("Finished writing data, processed {} telemetry files.", gameDatas.size());
 
+        trainingResult.setFilesProcessed(gameDatas.size());
+        trainingResult.setTrainingDataDirectory(telemetryInputDirectory);
+        trainingResult.setTimeElapsed(System.currentTimeMillis() - startTime);
+
+        return trainingResult;
     }
 
 }

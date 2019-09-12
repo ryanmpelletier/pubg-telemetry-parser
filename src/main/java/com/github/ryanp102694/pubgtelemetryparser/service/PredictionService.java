@@ -45,7 +45,7 @@ public class PredictionService {
             for(String playerName : mlPrediction.keySet()){ //should only be one in here, until I do refactoring
                 PlayerPrediction playerPrediction = new PlayerPrediction();
                 playerPrediction.setName(playerName);
-                playerPrediction.setPrediction(mlPrediction.get(playerName) == "alive");
+                playerPrediction.setPrediction("alive".equals(mlPrediction.get(playerName)));
                 //prediction was correct if I said they were alive and they are, OR I said they were dead and they are
                 playerPrediction.setCorrect(playerDataPoints.get(playerName).get("alive").equals("1") && playerPrediction.getPrediction() ||
                         playerDataPoints.get(playerName).get("alive").equals("0") && !playerPrediction.getPrediction());
