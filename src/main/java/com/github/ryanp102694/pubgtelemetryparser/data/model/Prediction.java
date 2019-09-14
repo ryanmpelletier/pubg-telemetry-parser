@@ -14,12 +14,21 @@ public class Prediction {
         return correct;
     }
 
+
     public void setCorrect(long correct) {
         this.correct = correct;
     }
 
+    public long getIncorrect() {
+        return incorrect;
+    }
+
     public void setIncorrect(long incorrect) {
         this.incorrect = incorrect;
+    }
+
+    public Map<String, List<PlayerPrediction>> getPlayerPredictions() {
+        return playerPredictions;
     }
 
     public void setPlayerPredictions(Map<String, List<PlayerPrediction>> playerPredictions) {
