@@ -1,12 +1,13 @@
 package com.github.ryanp102694.pubgtelemetryparser.data.model;
 
 import java.util.List;
+import java.util.Map;
 
 public class Prediction {
 
     private long correct;
     private long incorrect;
-    private List<PlayerPrediction> playerPredictions;
+    private Map<String, List<PlayerPrediction>> playerPredictions;
 
 
     public long getCorrect() {
@@ -17,19 +18,11 @@ public class Prediction {
         this.correct = correct;
     }
 
-    public long getIncorrect() {
-        return incorrect;
-    }
-
     public void setIncorrect(long incorrect) {
         this.incorrect = incorrect;
     }
 
-    public List<PlayerPrediction> getPlayerPredictions() {
-        return playerPredictions;
-    }
-
-    public void setPlayerPredictions(List<PlayerPrediction> playerPredictions) {
+    public void setPlayerPredictions(Map<String, List<PlayerPrediction>> playerPredictions) {
         this.playerPredictions = playerPredictions;
     }
 }

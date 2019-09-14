@@ -2,16 +2,16 @@ package com.github.ryanp102694.pubgtelemetryparser.data.model;
 
 public class PlayerPrediction {
 
-    private String name;
+    String gamePhase;
     private Boolean prediction;
     private Boolean correct;
 
-    public String getName() {
-        return name;
+    public String getGamePhase() {
+        return gamePhase;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setGamePhase(String gamePhase) {
+        this.gamePhase = gamePhase;
     }
 
     public Boolean getPrediction() {

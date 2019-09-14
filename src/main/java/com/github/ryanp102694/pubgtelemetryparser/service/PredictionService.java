@@ -7,10 +7,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
+import java.util.*;
 
 @Component
 public class PredictionService {
@@ -40,25 +37,38 @@ public class PredictionService {
         //do stuff here to build prediction
         Prediction prediction = new Prediction();
 
-        List<PlayerPrediction> playerPredictions = new ArrayList<>();
+        Map<String, List<PlayerPrediction>> playerPredictions  = new HashMap<>();
 
         for(int i = 0; i < jsonArray.length(); i++){
 
             JSONObject mlPrediction = jsonArray.getJSONObject(i);
 
-            for(String playerName : mlPrediction.keySet()){ //should only be one in here, until I do refactoring
+            for(String playerNameWithPhase : mlPrediction.keySet()){ //should only be one in here, until I do refactoring
+                String playerName = String.join("_",
+                        Arrays.copyOfRange(playerNameWithPhase.split("_"),0,
+                                (int) playerNameWithPhase.chars().filter(ch -> ch == '_').count()));
+
+                if(playerPredictions.get(playerName) == null){
+                    playerPredictions.put(playerName, new ArrayList<>());
+                }
+
                 PlayerPrediction playerPrediction = new PlayerPrediction();
-                playerPrediction.setName(playerName);
-                playerPrediction.setPrediction("alive".equals(mlPrediction.get(playerName)));
+                playerPrediction.setPrediction("alive".equals(mlPrediction.get(playerNameWithPhase)));
+                playerPrediction.setGamePhase(playerNameWithPhase.split("_")[(int) playerNameWithPhase.chars().filter(ch -> ch == '_').count()]);
                 //prediction was correct if I said they were alive and they are, OR I said they were dead and they are
-                playerPrediction.setCorrect(playerDataPoints.get(playerName).get("alive").equals("1") && playerPrediction.getPrediction() ||
-                        playerDataPoints.get(playerName).get("alive").equals("0") && !playerPrediction.getPrediction());
-                playerPredictions.add(playerPrediction);
+                playerPrediction.setCorrect(playerDataPoints.get(playerNameWithPhase).get("alive").equals("1") && playerPrediction.getPrediction() ||
+                        playerDataPoints.get(playerNameWithPhase).get("alive").equals("0") && !playerPrediction.getPrediction());
+                playerPredictions.get(playerName).add(playerPrediction);
             }
         }
 
-        prediction.setCorrect(playerPredictions.stream().filter(PlayerPrediction::getCorrect).count());
-        prediction.setIncorrect(playerPredictions.size() - prediction.getCorrect());
+        prediction.setCorrect(playerPredictions.values()
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(PlayerPrediction::getCorrect).count());
+
+        prediction.setIncorrect(
+                playerPredictions.values().stream().flatMap(Collection::stream).count() - prediction.getCorrect());
 
         prediction.setPlayerPredictions(playerPredictions);
         return prediction;

@@ -8,7 +8,7 @@ import java.util.SortedMap;
 /*
 
 Build something like this to send to the TensorFlow server
-
+//TODO update sample request
 {
     "features":{
         "supernewb":[1, 0, 0, 0, 0, 0, 1, 1],
