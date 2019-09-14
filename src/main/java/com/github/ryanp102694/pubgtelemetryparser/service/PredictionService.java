@@ -24,9 +24,13 @@ public class PredictionService {
         this.predictionRequestWriter = predictionRequestWriter;
     }
 
+    public String getPredictionServerQuery(Map<String, SortedMap<String, String>> playerDataPoints){
+        return predictionRequestWriter.getPredictionServerQuery(playerDataPoints);
+    }
+
 
     public Prediction getPrediction(Map<String, SortedMap<String, String>> playerDataPoints){
-        return predictionFromJson(predictionClient.makePrediction(predictionRequestWriter.getPredictionString(playerDataPoints)), playerDataPoints);
+        return predictionFromJson(predictionClient.makePrediction(predictionRequestWriter.getPredictionServerQuery(playerDataPoints)), playerDataPoints);
     }
 
 

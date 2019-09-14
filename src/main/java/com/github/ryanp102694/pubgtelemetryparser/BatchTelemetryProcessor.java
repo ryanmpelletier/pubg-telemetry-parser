@@ -61,21 +61,8 @@ public class BatchTelemetryProcessor {
                 .collect(Collectors.toList());
 
                 gameDatas.stream()
-                        .map(gameData -> {
-
-                            Stream<Map.Entry<String, SortedMap<String, String>>> result =
-                                    Stream.of(
-                                            gameData.getPlayerDataPoints("1.0").entrySet().stream(),
-                                            gameData.getPlayerDataPoints("2.0").entrySet().stream(),
-                                            gameData.getPlayerDataPoints("3.0").entrySet().stream(),
-                                            gameData.getPlayerDataPoints("4.0").entrySet().stream(),
-                                            gameData.getPlayerDataPoints("5.0").entrySet().stream(),
-                                            gameData.getPlayerDataPoints("6.0").entrySet().stream(),
-                                            gameData.getPlayerDataPoints("7.0").entrySet().stream()
-                                    ).flatMap(Function.identity());
-
-                            return trainingDataWriter.writeGameDataPoints(gameData.getMatchUUID(), result.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                        })
+                        .map(gameData -> trainingDataWriter.writeGameDataPoints(gameData.getMatchUUID(),
+                                gameData.getPhasedPlayerDataPoints()))
                         .collect(Collectors.toList())
                         .stream()
                         .map(CompletableFuture::join)

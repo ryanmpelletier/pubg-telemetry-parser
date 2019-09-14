@@ -5,6 +5,9 @@ import com.github.ryanp102694.pubgtelemetryparser.data.event.Player;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Will store all game info as game progresses.
@@ -78,7 +81,23 @@ public class GameData {
         this.playerStateMap = playerStateMap;
     }
 
-    public Map<String, SortedMap<String, String>> getPlayerDataPoints(String gamePhase){
+    public Map<String, SortedMap<String, String>> getPhasedPlayerDataPoints(){
+        Stream<Map.Entry<String, SortedMap<String, String>>> result =
+                Stream.of(
+                        getPlayerDataPoints("1.0").entrySet().stream(),
+                        getPlayerDataPoints("2.0").entrySet().stream(),
+                        getPlayerDataPoints("3.0").entrySet().stream(),
+                        getPlayerDataPoints("4.0").entrySet().stream(),
+                        getPlayerDataPoints("5.0").entrySet().stream(),
+                        getPlayerDataPoints("6.0").entrySet().stream(),
+                        getPlayerDataPoints("7.0").entrySet().stream(),
+                        getPlayerDataPoints("8.0").entrySet().stream()
+                ).flatMap(Function.identity());
+        return result.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+
+    private Map<String, SortedMap<String, String>> getPlayerDataPoints(String gamePhase){
         Map<String, SortedMap<String, String>> returnMap = new HashMap<>();
 
         //it is not guaranteed a particular game will progress through all phases, if it doesn't no further processing

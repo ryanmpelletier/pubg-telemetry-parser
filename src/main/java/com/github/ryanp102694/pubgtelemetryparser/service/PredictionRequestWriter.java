@@ -22,7 +22,7 @@ Build something like this to send to the TensorFlow server
 public class PredictionRequestWriter {
 
 
-    public String getPredictionString(Map<String, SortedMap<String, String>> playerDataPoints){
+    public String getPredictionServerQuery(Map<String, SortedMap<String, String>> playerDataPoints){
         StringBuilder predictionStringBuilder = new StringBuilder("{\"features\":{");
 
         for(String key : playerDataPoints.keySet()) {
