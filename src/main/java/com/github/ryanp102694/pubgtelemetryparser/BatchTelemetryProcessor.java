@@ -13,7 +13,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,8 +61,21 @@ public class BatchTelemetryProcessor {
                 .collect(Collectors.toList());
 
                 gameDatas.stream()
-                        .map(gameData -> trainingDataWriter
-                                .writeGameDataPoints(gameData.getMatchUUID(), gameData.getPlayerDataPoints("1.0")))
+                        .map(gameData -> {
+
+                            Stream<Map.Entry<String, SortedMap<String, String>>> result =
+                                    Stream.of(
+                                            gameData.getPlayerDataPoints("1.0").entrySet().stream(),
+                                            gameData.getPlayerDataPoints("2.0").entrySet().stream(),
+                                            gameData.getPlayerDataPoints("3.0").entrySet().stream(),
+                                            gameData.getPlayerDataPoints("4.0").entrySet().stream(),
+                                            gameData.getPlayerDataPoints("5.0").entrySet().stream(),
+                                            gameData.getPlayerDataPoints("6.0").entrySet().stream(),
+                                            gameData.getPlayerDataPoints("7.0").entrySet().stream()
+                                    ).flatMap(Function.identity());
+
+                            return trainingDataWriter.writeGameDataPoints(gameData.getMatchUUID(), result.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                        })
                         .collect(Collectors.toList())
                         .stream()
                         .map(CompletableFuture::join)
