@@ -29,6 +29,7 @@ public class TelemetryProcessor {
         Map<String, TelemetryEventHandler> telemetryEventHandlerMap = new HashMap<>();
         telemetryEventHandlerMap.put("LogMatchDefinition", new MatchDefinitionEventHandler());
         telemetryEventHandlerMap.put("LogMatchStart", new MatchStartEventHandler());
+        telemetryEventHandlerMap.put("LogMatchEnd", new MatchEndEventHandler());
         telemetryEventHandlerMap.put("LogPlayerPosition", new PlayerPositionEventHandler());
         telemetryEventHandlerMap.put("LogParachuteLanding", new ParachuteLandingEventHandler());
         telemetryEventHandlerMap.put("LogGameStatePeriodic", new GameStatePeriodicEventHandler());

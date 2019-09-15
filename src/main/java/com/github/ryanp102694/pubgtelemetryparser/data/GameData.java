@@ -19,6 +19,7 @@ public class GameData {
 
     private String gameId;
     private Instant startTime;
+    private List<Player> winners;
 
     /**
      * This will hold information about what is on the map. Should know where red/blue, white zone are.
@@ -55,6 +56,17 @@ public class GameData {
 
     public void setStartTime(Instant startTime) {
         this.startTime = startTime;
+    }
+
+    public List<Player> getWinners() {
+        if(winners == null){
+            return new ArrayList<>();
+        }
+        return winners;
+    }
+
+    public void setWinners(List<Player> winners) {
+        this.winners = winners;
     }
 
     public List<GameState> getGameStates() {
@@ -116,8 +128,13 @@ public class GameData {
 
             SortedMap<String, String> statsMap = new TreeMap<>();
 
-            //if we don't have an entry in the next state, they dead
-            statsMap.put("alive", nextPhaseStates.get(playerName) == null ? "0" : "1");
+            /*
+                Check to see if the player is alive
+                - if there is a PlayerState entry for the player in the next phase they are alive
+                - if the player lives until the end of the game, they are alive
+             */
+            statsMap.put("alive", (nextPhaseStates.get(playerName) != null ||
+                    winners.stream().map(Player::getName).collect(Collectors.toSet()).contains(playerName)) ? "1" : "0");
 
             //will return number between 0 and NEAREST_ENEMY_CAP
             statsMap.put("closestEnemyDistance", calculateClosestEnemyDistance(startPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, NEAREST_ENEMY_CAP)));
