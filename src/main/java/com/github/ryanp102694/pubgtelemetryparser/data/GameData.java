@@ -14,12 +14,16 @@ import java.util.stream.Stream;
  * Should be able to query this object with a time and get the state of all players of the game, dead or alive.
  *
  * A different GameData object will be created for each thread which is parsing telemetry
+ *
+ * TODO: I want GameData to be a dumb pojo
+ * TODO: I want a Spring managed threadsafe bean does all the calculating of stuff given a GameData object, lookups by game id?
+ * TODO: ...at the end of the day, I really want to be able to wire in "calculators" for different data points in a clean way
  */
 public class GameData {
 
     private String gameId;
     private Instant startTime;
-    private List<Player> winners;
+    private List<Player> winners;   //this isn't actually winners, it is the last people alive
 
     /**
      * This will hold information about what is on the map. Should know where red/blue, white zone are.
@@ -248,6 +252,7 @@ public class GameData {
         return String.format("%.2f", rangeMapper.apply(aliveTeammates));
     }
 
+    //small optimization could be made here to not recalculate this multiple times
     private GameState getGameStateByPhase(String gamePhase){
         for(GameState gameState : this.gameStates){
             if(gamePhase.equals(gameState.getGamePhase())){
@@ -257,6 +262,8 @@ public class GameData {
         return null;
     }
 
+    //this is called multiple times for each of the enemy within range calculations
+    //could optimize here to find enemies by team number instead and have some sort of cache for that
     private Map<String, PlayerState> getEnemyStatesByGamePhase(Player player, String gamePhase){
         Map<String, PlayerState> enemyPlayerStatesMap = new HashMap<>();
         Set<String> teamMembers = this.teamData.get(player.getTeamId());
@@ -316,18 +323,4 @@ public class GameData {
         }
         return playerStates;
     }
-
-    private PlayerState getPlayerState(String playerName, Instant time) {
-         List<PlayerState> playerStates = this.getPlayerStateMap().get(playerName);
-
-         //return the player state just before the requested time
-         for(int i = 0; i < playerStates.size(); i++){
-             if(playerStates.get(i).getTime().isAfter(this.startTime)){
-                 return playerStates.get(i);
-             }
-         }
-         //get the last recorded player state if one is not found
-         return playerStates.get(playerStates.size() - 1);
-    }
-
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//we don't actually need this, we can calculate it from the GameData
 public class MatchEndEventHandler implements TelemetryEventHandler {
 
     @Override
