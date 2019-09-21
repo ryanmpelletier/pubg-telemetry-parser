@@ -57,20 +57,23 @@ public class BatchTelemetryProcessor {
                 .map(CompletableFuture::join)
                 .collect(Collectors.toList());
 
-                gameDatas.stream()
-                        .map(gameData -> trainingDataWriter.writeGameDataPoints(gameData.getMatchUUID(),
-                                gameData.getPhasedPlayerDataPoints()))
-                        .collect(Collectors.toList())
-                        .stream()
-                        .map(CompletableFuture::join)
-                        .collect(Collectors.toList());
+        gameDatas.stream()
+                .map(gameData -> trainingDataWriter.writeGameDataPoints(gameData.getMatchUUID(),
+                        gameData.getPhasedPlayerDataPoints()))
+                .collect(Collectors.toList())
+                .stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
+
         log.debug("Finished writing intermediate data, processed {} telemetry files.", gameDatas.size());
 
         trainingResult.setFilesProcessed(gameDatas.size());
         trainingResult.setTrainingDataDirectory(telemetryInputDirectory);
         trainingResult.setTimeElapsed(System.currentTimeMillis() - startTime);
 
+        log.debug("Begin merging data into single training.csv and labels.csv");
         trainingDataWriter.mergeData();
+        log.debug("Finished merging data into single training.csv and labels.csv");
 
         return trainingResult;
     }

@@ -26,6 +26,7 @@ public class PlayerPositionEventHandler implements TelemetryEventHandler {
 
         PlayerState playerState = new PlayerState();
         playerState.setPlayer(player);
+        playerState.setTotalKills(playerState.getTotalKills());
         playerState.setNumAlivePlayers(event.getInt("numAlivePlayers"));
         playerState.setElapsedTime(event.getInt("elapsedTime"));
         playerState.setGamePhase(String.valueOf(event.getJSONObject("common").getDouble("isGame")));

@@ -33,6 +33,7 @@ public class TelemetryProcessor {
         telemetryEventHandlerMap.put("LogPlayerPosition", new PlayerPositionEventHandler());
         telemetryEventHandlerMap.put("LogParachuteLanding", new ParachuteLandingEventHandler());
         telemetryEventHandlerMap.put("LogGameStatePeriodic", new GameStatePeriodicEventHandler());
+        telemetryEventHandlerMap.put("LogPlayerKill", new PlayerKillEventHandler());
         this.telemetryEventHandlerMap = telemetryEventHandlerMap;
     }
 

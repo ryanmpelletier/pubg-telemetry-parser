@@ -14,6 +14,7 @@ public class PlayerState extends Common {
     private Player player;
     private int numAlivePlayers;
     private int elapsedTime;
+    private int totalKills;
 
     public Player getPlayer() {
         return player;
@@ -37,5 +38,13 @@ public class PlayerState extends Common {
 
     public void setElapsedTime(int elapsedTime) {
         this.elapsedTime = elapsedTime;
+    }
+
+    public int getTotalKills() {
+        return totalKills;
+    }
+
+    public void setTotalKills(int totalKills) {
+        this.totalKills = totalKills;
     }
 }

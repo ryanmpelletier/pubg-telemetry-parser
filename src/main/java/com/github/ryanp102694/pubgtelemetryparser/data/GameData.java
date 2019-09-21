@@ -32,7 +32,8 @@ public class GameData {
      */
     private List<GameState> gameStates;
     private Map<Integer, Set<String>> teamData;
-    private Map<String, List<PlayerState>> playerStateMap;
+    private Map<String, List<PlayerState>> playerStateMap; //TODO: this should really just be player positions or something and should be nested in a PlayerData object
+    private Map<String, Double> playerKillsMap;
 
     //if there are more than this many enemies in a zone, we'll just record 15, which will make the data easier to normalize
     static int ENEMY_NUMBER_CAP = 15;
@@ -41,6 +42,7 @@ public class GameData {
     static double DISTANCE_TO_SAFE_ZONE_CAP = 250000.0;
     static double EIGHT_KM_MAP_SIZE = 816000.0;
     static double HEIGHT_CAP = 100000.0;
+    static double KILL_CAP = 12;
 
 
     public String getGameId() {
@@ -107,6 +109,17 @@ public class GameData {
         this.playerStateMap = playerStateMap;
     }
 
+    public Map<String, Double> getPlayerKillsMap() {
+        if(playerKillsMap == null){
+            this.playerKillsMap = new HashMap<>();
+        }
+        return playerKillsMap;
+    }
+
+    public void setPlayerKillsMap(Map<String, Double> playerKillsMap) {
+        this.playerKillsMap = playerKillsMap;
+    }
+
     public Map<String, SortedMap<String, String>> getPhasedPlayerDataPoints(){
         Stream<Map.Entry<String, SortedMap<String, String>>> result =
                 Stream.of(
@@ -131,39 +144,37 @@ public class GameData {
             return returnMap;
         }
 
-        Map<String, PlayerState> startPhaseStates = getStatesByPhase(gamePhase);
-        Map<String, PlayerState> nextPhaseStates = getStatesByPhase(String.valueOf(Double.parseDouble(gamePhase) + 1.0));
+        Map<String, PlayerState> currentPhasePlayerStates = getStatesByPhase(gamePhase);
+        Map<String, PlayerState> nextPhasePlayerStates = getStatesByPhase(String.valueOf(Double.parseDouble(gamePhase) + 1.0));
 
         //for each player in this list, I will build an entry in the map
-        for(String playerName : startPhaseStates.keySet()){
+        for(String playerName : currentPhasePlayerStates.keySet()){
 
-            PlayerState startPlayerState = startPhaseStates.get(playerName);
-
+            PlayerState currentPlayerState = currentPhasePlayerStates.get(playerName);
 
             SortedMap<String, String> statsMap = new TreeMap<>();
-
             /*
                 Check to see if the player is alive
                 - if there is a PlayerState entry for the player in the next phase they are alive
                 - if the player lives until the end of the game, they are alive
              */
-            statsMap.put("alive", (nextPhaseStates.get(playerName) != null ||
+            statsMap.put("alive", (nextPhasePlayerStates.get(playerName) != null ||
                     winners.stream().map(Player::getName).collect(Collectors.toSet()).contains(playerName)) ? "1" : "0");
 
             //will return number between 0 and NEAREST_ENEMY_CAP
-            statsMap.put("closestEnemyDistance", calculateClosestEnemyDistance(startPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, NEAREST_ENEMY_CAP)));
+            statsMap.put("closestEnemyDistance", calculateClosestEnemyDistance(currentPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, NEAREST_ENEMY_CAP)));
 
 
             //number between 0 and DISTANCE_TO_SAFE_ZONE_CAP
-            statsMap.put("distanceToSafeZone", calculateDistanceToSafeZone(startPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, DISTANCE_TO_SAFE_ZONE_CAP)));
+            statsMap.put("distanceToSafeZone", calculateDistanceToSafeZone(currentPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, DISTANCE_TO_SAFE_ZONE_CAP)));
 
             RangeMapper enemyRangeMapper = new RangeMapper(0.0, ENEMY_NUMBER_CAP);
 
             //will return number between 0 and ENEMY_NUMBER_CAP
-            statsMap.put("enemyCountZeroToTwentyFive", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 0.0, 25.0, enemyRangeMapper));
-            statsMap.put("enemyCountTwentyFiveToFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 25.0, 50.0, enemyRangeMapper));
-            statsMap.put("enemyCountFiftyToOneHundred", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 50.0, 100.0, enemyRangeMapper));
-            statsMap.put("enemyCountOneHundredToTwoFifty", calculateEnemiesWithinDistance(startPlayerState.getPlayer(), gamePhase, 100.0, 250.0, enemyRangeMapper));
+            statsMap.put("enemyCountZeroToTwentyFive", calculateEnemiesWithinDistance(currentPlayerState.getPlayer(), gamePhase, 0.0, 25.0, enemyRangeMapper));
+            statsMap.put("enemyCountTwentyFiveToFifty", calculateEnemiesWithinDistance(currentPlayerState.getPlayer(), gamePhase, 25.0, 50.0, enemyRangeMapper));
+            statsMap.put("enemyCountFiftyToOneHundred", calculateEnemiesWithinDistance(currentPlayerState.getPlayer(), gamePhase, 50.0, 100.0, enemyRangeMapper));
+            statsMap.put("enemyCountOneHundredToTwoFifty", calculateEnemiesWithinDistance(currentPlayerState.getPlayer(), gamePhase, 100.0, 250.0, enemyRangeMapper));
 
             //which game phase we are in, we'll do up to 7.0 for now
             statsMap.put("gamePhase1", "1.0".equals(gamePhase) ? "1.0" : "0.0");
@@ -176,19 +187,21 @@ public class GameData {
             statsMap.put("gamePhase8", "8.0".equals(gamePhase) ? "1.0" : "0.0");
 
             //return number between 0 and NEAREST_TEAM_MEMBER_CAP
-            statsMap.put("nearestTeamMember", calculateNearestTeamMember(startPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, NEAREST_TEAM_MEMBER_CAP)));
+            statsMap.put("nearestTeamMember", calculateNearestTeamMember(currentPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, NEAREST_TEAM_MEMBER_CAP)));
 
             //return between 0 and 3
-            statsMap.put("numAliveTeamMembers", calculateAliveTeammates(startPlayerState.getPlayer().getTeamId(), startPlayerState.getPlayer().getName(), gamePhase, new RangeMapper(0.0, 3.0)));
+            statsMap.put("numAliveTeamMembers", calculateAliveTeammates(currentPlayerState.getPlayer().getTeamId(), currentPlayerState.getPlayer().getName(), gamePhase, new RangeMapper(0.0, 3.0)));
 
-            statsMap.put("xPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getX(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
-            statsMap.put("yPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getY(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
-            statsMap.put("zPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getZ(), new RangeMapper(0.0, HEIGHT_CAP)));
+            statsMap.put("xPosition", calculatePositionValue(currentPlayerState.getPlayer().getLocation().getX(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
+            statsMap.put("yPosition", calculatePositionValue(currentPlayerState.getPlayer().getLocation().getY(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
+            statsMap.put("zPosition", calculatePositionValue(currentPlayerState.getPlayer().getLocation().getZ(), new RangeMapper(0.0, HEIGHT_CAP)));
 
             statsMap.put("mapErangel", ("Erangel_Main".equals(getMapName()) || "Baltic_Main".equals(getMapName())) ? "1.0" : "0.0");
             statsMap.put("mapMiramar", "Desert_Main".equals(getMapName()) ? "1.0" : "0.0");
 
-            returnMap.put(startPlayerState.getPlayer().getName() + "_" + gamePhase, statsMap);
+            statsMap.put("killsCount", calculateTotalKills(playerKillsMap.get(currentPlayerState.getPlayer().getName()) == null ? 0.0 : playerKillsMap.get(currentPlayerState.getPlayer().getName()), new RangeMapper(0.0, KILL_CAP)));
+
+            returnMap.put(currentPlayerState.getPlayer().getName() + "_" + gamePhase, statsMap);
         }
 
         return returnMap;
@@ -265,6 +278,10 @@ public class GameData {
             }
         }
         return String.format("%.2f", rangeMapper.apply(aliveTeammates));
+    }
+
+    private String calculateTotalKills(Double kills, RangeMapper rangeMapper){
+        return String.format("%.2f", rangeMapper.apply(kills));
     }
 
     //small optimization could be made here to not recalculate this multiple times

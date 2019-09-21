@@ -4,6 +4,7 @@
 "enemyCountOneHundredToTwoFifty"
 "enemyCountTwentyFiveToFifty"
 "enemyCountZeroToTwentyFive"
+TODO: maybe put all phases into continuousVar
 "gamePhase0"
 "gamePhase1"
 "gamePhase2"
@@ -20,3 +21,20 @@
 "zPosition"
 "mapErangel"
 "mapMiramar"
+TODO: number alive players
+TODO: number of kills
+TODO: health
+TODO: blueZone
+TODO: redZone
+TODO: isLoggedOut
+TODO: weaponFireCount
+TODO: distanceToPackage
+TODO: helmet
+TODO: vest
+TODO: hasSR
+TODO: hasDMR
+TODO: hasAR
+TODO: hasScope
+TODO: firstAidCount
+TODO: boosterCount
+TODO: inWater

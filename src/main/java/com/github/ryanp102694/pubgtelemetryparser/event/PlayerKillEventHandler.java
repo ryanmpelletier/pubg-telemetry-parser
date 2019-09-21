@@ -1,7 +1,12 @@
 package com.github.ryanp102694.pubgtelemetryparser.event;
 
 import com.github.ryanp102694.pubgtelemetryparser.data.GameData;
+import com.github.ryanp102694.pubgtelemetryparser.data.PlayerState;
+import com.github.ryanp102694.pubgtelemetryparser.data.event.Player;
 import org.json.JSONObject;
+
+import java.time.Instant;
+import java.util.List;
 
 
 /**
@@ -39,12 +44,12 @@ import org.json.JSONObject;
  */
 public class PlayerKillEventHandler implements TelemetryEventHandler {
 
-
-    /**
-     * I don't think I want this.
-     */
     @Override
     public void handle(JSONObject event, GameData gameData) {
-
+        if(!event.isNull("killer")){
+            JSONObject killer = event.getJSONObject("killer");
+            gameData.getPlayerKillsMap().computeIfAbsent(killer.getString("name"), playerName  -> 0.0);
+            gameData.getPlayerKillsMap().put(killer.getString("name"), gameData.getPlayerKillsMap().get(killer.getString("name")) + 1.0);
+        }
     }
 }
