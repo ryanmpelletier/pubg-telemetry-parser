@@ -43,6 +43,7 @@ public class GameData {
     static double EIGHT_KM_MAP_SIZE = 816000.0;
     static double HEIGHT_CAP = 100000.0;
     static double KILL_CAP = 12;
+    static double MAX_PLAYERS = 100;
 
 
     public String getGameId() {
@@ -161,6 +162,9 @@ public class GameData {
             statsMap.put("alive", (nextPhasePlayerStates.get(playerName) != null ||
                     winners.stream().map(Player::getName).collect(Collectors.toSet()).contains(playerName)) ? "1" : "0");
 
+            statsMap.put("mapErangel", ("Erangel_Main".equals(getMapName()) || "Baltic_Main".equals(getMapName())) ? "1.0" : "0.0");
+            statsMap.put("mapMiramar", "Desert_Main".equals(getMapName()) ? "1.0" : "0.0");
+
             //will return number between 0 and NEAREST_ENEMY_CAP
             statsMap.put("closestEnemyDistance", calculateClosestEnemyDistance(currentPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, NEAREST_ENEMY_CAP)));
 
@@ -196,10 +200,8 @@ public class GameData {
             statsMap.put("yPosition", calculatePositionValue(currentPlayerState.getPlayer().getLocation().getY(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
             statsMap.put("zPosition", calculatePositionValue(currentPlayerState.getPlayer().getLocation().getZ(), new RangeMapper(0.0, HEIGHT_CAP)));
 
-            statsMap.put("mapErangel", ("Erangel_Main".equals(getMapName()) || "Baltic_Main".equals(getMapName())) ? "1.0" : "0.0");
-            statsMap.put("mapMiramar", "Desert_Main".equals(getMapName()) ? "1.0" : "0.0");
-
             statsMap.put("killsCount", calculateTotalKills(playerKillsMap.get(currentPlayerState.getPlayer().getName()) == null ? 0.0 : playerKillsMap.get(currentPlayerState.getPlayer().getName()), new RangeMapper(0.0, KILL_CAP)));
+            statsMap.put("numberOfAlivePlayers", calculateNumberOfAlivePlayers(currentPlayerState, new RangeMapper(0.0, MAX_PLAYERS)));
 
             returnMap.put(currentPlayerState.getPlayer().getName() + "_" + gamePhase, statsMap);
         }
@@ -282,6 +284,10 @@ public class GameData {
 
     private String calculateTotalKills(Double kills, RangeMapper rangeMapper){
         return String.format("%.2f", rangeMapper.apply(kills));
+    }
+
+    private String calculateNumberOfAlivePlayers(PlayerState playerState, RangeMapper rangeMapper){
+        return String.format("%.2f", rangeMapper.apply((double) playerState.getNumAlivePlayers()));
     }
 
     //small optimization could be made here to not recalculate this multiple times
