@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.time.Instant;
 import java.util.ArrayList;
 
+import org.springframework.stereotype.Component;
 
 /**
  * "gameState": {
@@ -24,6 +25,7 @@ import java.util.ArrayList;
  *   "redZoneRadius":            number
  * }
  */
+@Component("LogGameStatePeriodic")
 public class GameStatePeriodicEventHandler implements TelemetryEventHandler {
 
     @Override

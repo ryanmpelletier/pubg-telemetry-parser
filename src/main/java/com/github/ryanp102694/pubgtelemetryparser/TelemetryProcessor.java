@@ -22,20 +22,11 @@ public class TelemetryProcessor {
 
     private final static Logger log = LoggerFactory.getLogger(TelemetryProcessor.class);
 
+    private Map<String, TelemetryEventHandler> telemetryEventHandlerMap;
 
-    Map<String, TelemetryEventHandler> telemetryEventHandlerMap;
-
-    public TelemetryProcessor(){
-        Map<String, TelemetryEventHandler> telemetryEventHandlerMap = new HashMap<>();
-        telemetryEventHandlerMap.put("LogMatchDefinition", new MatchDefinitionEventHandler());
-        telemetryEventHandlerMap.put("LogMatchStart", new MatchStartEventHandler());
-        telemetryEventHandlerMap.put("LogMatchEnd", new MatchEndEventHandler());
-        telemetryEventHandlerMap.put("LogPlayerPosition", new PlayerPositionEventHandler());
-        telemetryEventHandlerMap.put("LogParachuteLanding", new ParachuteLandingEventHandler());
-        telemetryEventHandlerMap.put("LogGameStatePeriodic", new GameStatePeriodicEventHandler());
+    public void setTelemetryEventHandlerMap(Map<String,TelemetryEventHandler> telemetryEventHandlerMap){
         this.telemetryEventHandlerMap = telemetryEventHandlerMap;
     }
-
 
     @Async
     public CompletableFuture<GameData> process(InputStream telemetry) throws IOException {
