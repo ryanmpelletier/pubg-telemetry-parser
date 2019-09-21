@@ -185,7 +185,7 @@ public class GameData {
             statsMap.put("yPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getY(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
             statsMap.put("zPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getZ(), new RangeMapper(0.0, HEIGHT_CAP)));
 
-            statsMap.put("mapErangel", "Erangel_Main".equals(getMapName()) ? "1.0" : "0.0");
+            statsMap.put("mapErangel", ("Erangel_Main".equals(getMapName()) || "Baltic_Main".equals(getMapName())) ? "1.0" : "0.0");
             statsMap.put("mapMiramar", "Desert_Main".equals(getMapName()) ? "1.0" : "0.0");
 
             returnMap.put(startPlayerState.getPlayer().getName() + "_" + gamePhase, statsMap);
