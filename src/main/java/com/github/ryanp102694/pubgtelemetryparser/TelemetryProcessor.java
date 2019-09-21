@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,7 @@ public class TelemetryProcessor {
 
     private Map<String, TelemetryEventHandler> telemetryEventHandlerMap;
 
+    @Autowired
     public void setTelemetryEventHandlerMap(Map<String,TelemetryEventHandler> telemetryEventHandlerMap){
         this.telemetryEventHandlerMap = telemetryEventHandlerMap;
     }
@@ -33,8 +35,7 @@ public class TelemetryProcessor {
         log.debug("Begin processing telemetry");
         long startTime = System.currentTimeMillis();
         GameData gameData = new GameData();
-        JSONArray telemetryEvents;
-        telemetryEvents = new JSONArray(IOUtils.toString(telemetry, StandardCharsets.UTF_8));
+        JSONArray telemetryEvents = new JSONArray(IOUtils.toString(telemetry, StandardCharsets.UTF_8));
         for(int i = 0; i < telemetryEvents.length(); i++) {
             JSONObject telemetryEvent = telemetryEvents.getJSONObject(i);
             String eventType = telemetryEvent.getString("_T");
