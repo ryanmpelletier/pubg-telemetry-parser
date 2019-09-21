@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -22,28 +23,19 @@ public class TelemetryProcessor {
 
     private final static Logger log = LoggerFactory.getLogger(TelemetryProcessor.class);
 
+    private Map<String, TelemetryEventHandler> telemetryEventHandlerMap;
 
-    Map<String, TelemetryEventHandler> telemetryEventHandlerMap;
-
-    public TelemetryProcessor(){
-        Map<String, TelemetryEventHandler> telemetryEventHandlerMap = new HashMap<>();
-        telemetryEventHandlerMap.put("LogMatchDefinition", new MatchDefinitionEventHandler());
-        telemetryEventHandlerMap.put("LogMatchStart", new MatchStartEventHandler());
-        telemetryEventHandlerMap.put("LogMatchEnd", new MatchEndEventHandler());
-        telemetryEventHandlerMap.put("LogPlayerPosition", new PlayerPositionEventHandler());
-        telemetryEventHandlerMap.put("LogParachuteLanding", new ParachuteLandingEventHandler());
-        telemetryEventHandlerMap.put("LogGameStatePeriodic", new GameStatePeriodicEventHandler());
+    @Autowired
+    public void setTelemetryEventHandlerMap(Map<String,TelemetryEventHandler> telemetryEventHandlerMap){
         this.telemetryEventHandlerMap = telemetryEventHandlerMap;
     }
-
 
     @Async
     public CompletableFuture<GameData> process(InputStream telemetry) throws IOException {
         log.debug("Begin processing telemetry");
         long startTime = System.currentTimeMillis();
         GameData gameData = new GameData();
-        JSONArray telemetryEvents;
-        telemetryEvents = new JSONArray(IOUtils.toString(telemetry, StandardCharsets.UTF_8));
+        JSONArray telemetryEvents = new JSONArray(IOUtils.toString(telemetry, StandardCharsets.UTF_8));
         for(int i = 0; i < telemetryEvents.length(); i++) {
             JSONObject telemetryEvent = telemetryEvents.getJSONObject(i);
             String eventType = telemetryEvent.getString("_T");

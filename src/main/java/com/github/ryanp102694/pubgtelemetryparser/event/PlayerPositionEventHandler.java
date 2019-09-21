@@ -9,6 +9,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.springframework.stereotype.Component;
+
+@Component("LogPlayerPosition")
 public class PlayerPositionEventHandler implements TelemetryEventHandler {
 
     @Override

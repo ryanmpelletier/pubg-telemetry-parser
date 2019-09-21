@@ -5,6 +5,9 @@ import org.json.JSONObject;
 
 import java.time.Instant;
 
+import org.springframework.stereotype.Component;
+
+@Component("LogMatchDefinition")
 public class MatchDefinitionEventHandler implements TelemetryEventHandler {
 
     @Override

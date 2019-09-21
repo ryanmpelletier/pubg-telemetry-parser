@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 //we don't actually need this, we can calculate it from the GameData
+@Component("LogMatchEnd")
 public class MatchEndEventHandler implements TelemetryEventHandler {
 
     @Override

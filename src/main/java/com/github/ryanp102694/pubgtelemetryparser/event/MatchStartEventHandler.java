@@ -9,6 +9,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.stereotype.Component;
+
+@Component("LogMatchStart")
 public class MatchStartEventHandler implements TelemetryEventHandler {
 
     @Override
