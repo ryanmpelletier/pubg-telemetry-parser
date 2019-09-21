@@ -121,7 +121,7 @@ public class TrainingDataWriter {
 
         File folder = new File(dataOutputDir);
         List<File> sources = Stream.of(folder.listFiles())
-                .filter(file -> file.getName().contains(filePattern))
+                .filter(file -> file.getName().contains("." + filePattern + "."))
                 .sorted()
                 .collect(Collectors.toList());
 
