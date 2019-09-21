@@ -64,11 +64,13 @@ public class BatchTelemetryProcessor {
                         .stream()
                         .map(CompletableFuture::join)
                         .collect(Collectors.toList());
-        log.debug("Finished writing data, processed {} telemetry files.", gameDatas.size());
+        log.debug("Finished writing intermediate data, processed {} telemetry files.", gameDatas.size());
 
         trainingResult.setFilesProcessed(gameDatas.size());
         trainingResult.setTrainingDataDirectory(telemetryInputDirectory);
         trainingResult.setTimeElapsed(System.currentTimeMillis() - startTime);
+
+        trainingDataWriter.mergeData();
 
         return trainingResult;
     }

@@ -1,16 +1,18 @@
 package com.github.ryanp102694.pubgtelemetryparser.service;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Component
@@ -90,4 +92,67 @@ public class TrainingDataWriter {
         }
         return labelBuilder.toString();
     }
+
+    public void mergeData(){
+        try{
+            log.debug("Merging training files.");
+            mergeTrainingFiles();
+            log.debug("Merging label files.");
+            mergeLabelFiles();
+            log.debug("Deleting intermediate files.");
+            deleteIntermediateFiles();
+        }catch(IOException e){
+            log.debug("Something went wrong and you should feel bad.");
+            e.printStackTrace();
+        }
+    }
+
+
+    private void mergeTrainingFiles() throws IOException {
+        mergeTrainingDataFiles("training");
+    }
+    private void mergeLabelFiles() throws IOException {
+        mergeTrainingDataFiles("labels");
+
+    }
+
+    //builds a single training.csv and labels.csv
+    private void mergeTrainingDataFiles(String filePattern) throws IOException {
+
+        File folder = new File(dataOutputDir);
+        List<File> sources = Stream.of(folder.listFiles())
+                .filter(file -> file.getName().contains(filePattern))
+                .sorted()
+                .collect(Collectors.toList());
+
+        File destination = new File(dataOutputDir + "/" + filePattern + ".csv");
+
+        try(OutputStream output = createAppendableStream(destination)) {
+            for(int i = 0; i < sources.size(); i++){
+                appendFile(output, sources.get(i), i == 0);
+            }
+        }
+    }
+
+    private BufferedOutputStream createAppendableStream(File destination)
+            throws FileNotFoundException {
+        return new BufferedOutputStream(new FileOutputStream(destination, true));
+    }
+
+    private void appendFile(OutputStream output, File source, boolean firstFile) throws IOException {
+        try(InputStream input = new BufferedInputStream(new FileInputStream(source))) {
+            if(!firstFile){
+                IOUtils.write("\n", output, Charset.defaultCharset());
+            }
+            IOUtils.copy(input, output);
+        }
+    }
+
+    private void deleteIntermediateFiles() {
+        File folder = new File(dataOutputDir);
+        Stream.of(folder.listFiles())
+                .filter(file -> file.getName().contains(".training.") || file.getName().contains(".labels."))
+                .forEach(File::delete);
+    }
+
 }

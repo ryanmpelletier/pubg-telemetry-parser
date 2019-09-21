@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 public class GameData {
 
     private String gameId;
+    private String mapName;
     private Instant startTime;
     private List<Player> winners;   //this isn't actually winners, it is the last people alive
 
@@ -48,6 +49,14 @@ public class GameData {
 
     public void setGameId(String gameId) {
         this.gameId = gameId;
+    }
+
+    public String getMapName() {
+        return mapName;
+    }
+
+    public void setMapName(String mapName) {
+        this.mapName = mapName;
     }
 
     public String getMatchUUID(){
@@ -175,6 +184,9 @@ public class GameData {
             statsMap.put("xPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getX(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
             statsMap.put("yPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getY(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
             statsMap.put("zPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getZ(), new RangeMapper(0.0, HEIGHT_CAP)));
+
+            statsMap.put("mapErangel", "Erangel_Main".equals(getMapName()) ? "1.0" : "0.0");
+            statsMap.put("mapMiramar", "Desert_Main".equals(getMapName()) ? "1.0" : "0.0");
 
             returnMap.put(startPlayerState.getPlayer().getName() + "_" + gamePhase, statsMap);
         }
