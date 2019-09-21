@@ -39,6 +39,7 @@ public class GameData {
     static double NEAREST_ENEMY_CAP = 50000.0;
     static double DISTANCE_TO_SAFE_ZONE_CAP = 250000.0;
     static double EIGHT_KM_MAP_SIZE = 816000.0;
+    static double HEIGHT_CAP = 100000.0;
 
 
     public String getGameId() {
@@ -163,6 +164,7 @@ public class GameData {
             statsMap.put("gamePhase5", "5.0".equals(gamePhase) ? "1.0" : "0.0");
             statsMap.put("gamePhase6", "6.0".equals(gamePhase) ? "1.0" : "0.0");
             statsMap.put("gamePhase7", "7.0".equals(gamePhase) ? "1.0" : "0.0");
+            statsMap.put("gamePhase8", "8.0".equals(gamePhase) ? "1.0" : "0.0");
 
             //return number between 0 and NEAREST_TEAM_MEMBER_CAP
             statsMap.put("nearestTeamMember", calculateNearestTeamMember(startPlayerState.getPlayer(), gamePhase, new RangeMapper(0.0, NEAREST_TEAM_MEMBER_CAP)));
@@ -172,6 +174,7 @@ public class GameData {
 
             statsMap.put("xPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getX(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
             statsMap.put("yPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getY(), new RangeMapper(0.0, EIGHT_KM_MAP_SIZE)));
+            statsMap.put("zPosition", calculatePositionValue(startPlayerState.getPlayer().getLocation().getZ(), new RangeMapper(0.0, HEIGHT_CAP)));
 
             returnMap.put(startPlayerState.getPlayer().getName() + "_" + gamePhase, statsMap);
         }
