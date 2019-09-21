@@ -11,6 +11,6 @@ Modify src/main/resources/application.yml to configure before building. By defau
 
 ## building and running
 ```
-gradle clean build
+./gradlew clean build
 java -jar build/libs/pubg-telemetry-parser-0.0.1-SNAPSHOT.jar
 ```
