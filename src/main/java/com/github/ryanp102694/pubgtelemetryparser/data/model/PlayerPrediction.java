@@ -2,7 +2,7 @@ package com.github.ryanp102694.pubgtelemetryparser.data.model;
 
 public class PlayerPrediction {
 
-    String gamePhase;
+    private String gamePhase;
     private Boolean prediction;
     private Boolean correct;
 
