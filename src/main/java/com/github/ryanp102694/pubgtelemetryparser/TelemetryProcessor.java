@@ -37,9 +37,7 @@ public class TelemetryProcessor {
         this.telemetryEventHandlerMap = telemetryEventHandlerMap;
     }
 
-
-    @Async
-    public CompletableFuture<GameData> process(InputStream telemetry) throws IOException {
+    public GameData processTelemetry(InputStream telemetry) throws IOException {
         log.debug("Begin processing telemetry");
         long startTime = System.currentTimeMillis();
         GameData gameData = new GameData();
@@ -54,6 +52,11 @@ public class TelemetryProcessor {
             }
         }
         log.debug("End processing, took {} milliseconds", System.currentTimeMillis() - startTime);
-        return CompletableFuture.completedFuture(gameData);
+        return gameData;
+    }
+
+    @Async
+    public CompletableFuture<GameData> process(InputStream telemetry) throws IOException {
+        return CompletableFuture.completedFuture(processTelemetry(telemetry));
     }
 }
