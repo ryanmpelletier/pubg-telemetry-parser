@@ -19,7 +19,15 @@ public class MatchEndEventHandler implements TelemetryEventHandler {
         JSONArray jsonArray = event.getJSONArray("characters");
 
         for(int i = 0; i < jsonArray.length(); i++){
-            winners.add(new Player().fromJSONObject(jsonArray.getJSONObject(i)));
+
+            JSONObject characterObject = jsonArray.getJSONObject(i);
+            //character became nested
+            if(characterObject.keySet().contains("character")){
+                characterObject = characterObject.getJSONObject("character");
+            }
+
+
+            winners.add(new Player().fromJSONObject(characterObject));
         }
         winners = winners.stream().filter(player -> {
             return player.getHealth() > 0.0;

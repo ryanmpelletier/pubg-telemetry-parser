@@ -30,6 +30,14 @@ public class MatchStartEventHandler implements TelemetryEventHandler {
 
         for(int i = 0; i < charactersArray.length(); i++){
             JSONObject character = charactersArray.getJSONObject(i);
+
+            //API change made "character" nested, we'll check to see if there is a "character" property, if there is we
+            //need to get the teamId from that
+            if(character.keySet().contains("character")){
+                character = character.getJSONObject("character");
+            }
+
+
             if(!teamMap.containsKey(character.getInt("teamId"))){
                 teamMap.put(character.getInt("teamId"), new HashSet<>());
             }
